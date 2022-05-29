@@ -82,16 +82,26 @@ class Car:
         self.sy = init_y
         self.sq = 0
         
-        self.vel_L = -0.3
-        self.vel_R = -0.6
-        
-    def update(self):
-        t_sq = (self.vel_L - self.vel_R) / BODY_W
-        t_vel = (self.vel_L + self.vel_R) / 2.0
+    def update(self,vel_L,vel_R):
+        vel_L *= -1
+        vel_R *= -1
+        t_sq = (vel_L - vel_R) / BODY_W
+        t_vel = (vel_L + vel_R) / 2.0
         
         self.sq += t_sq
         self.sx += t_vel * np.sin(self.sq)
         self.sy += t_vel * np.cos(self.sq)
+
+        if self.sx < 0:
+            self.sx += WINDOW_W
+        if self.sx >= WINDOW_W:
+            self.sx -= WINDOW_W
+        if self.sy < 0:
+            self.sy += WINDOW_H
+        if self.sy >= WINDOW_H:
+            self.sy -= WINDOW_H
+
+
         
     def draw(self):
         body,sensR,sensL,tireR,tireL = drawCar(self.sx,self.sy,self.sq)
@@ -106,7 +116,6 @@ class Car:
 class Simulation:
     def __init__(self):
         self.car = Car(300,300)
-        
     
     def mainloop(self,running):
         for event in pg.event.get():
@@ -121,7 +130,7 @@ class Simulation:
         screen.fill((0,0,0))
         pg.draw.rect(screen, (220,220,0), (0,0,32,32))
         
-        self.car.update()
+        self.car.update(0.55,0.6)
         self.car.draw()
         
         return running
