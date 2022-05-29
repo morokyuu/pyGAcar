@@ -10,10 +10,14 @@ Created on Sat May 28 09:19:09 2022
 import pygame as pg
 import random
 import numpy as np
+import os
 
 # window size
 WINDOW_W = 640
 WINDOW_H = 480
+
+SCREENRECT = pg.Rect(0,0,640,480)
+main_dir = os.path.split(os.path.abspath(__file__))[0]
 
 # frame rate
 FPS = 60
@@ -21,6 +25,16 @@ fpsClock = pg.time.Clock()
 
 # polygon usage
 # https://programtalk.com/python-examples/pygame.draw.polygon/
+
+def load_image(file):
+    """loads an image, prepares it for play"""
+    file = os.path.join(main_dir, "data", file)
+    try:
+        surface = pg.image.load(file)
+    except pg.error:
+        raise SystemExit('Could not load image "%s" %s' % (file, pg.get_error()))
+    return surface.convert()
+
 
 
 def rot(th):
@@ -116,6 +130,8 @@ class Car:
 class Simulation:
     def __init__(self):
         self.car = Car(300,300)
+        self.background = load_image('course1.jpg')
+        #self.background = pg.Surface(SCREENRECT.size)
     
     def mainloop(self,running):
         for event in pg.event.get():
@@ -128,6 +144,7 @@ class Simulation:
                     running = False
         
         screen.fill((0,0,0))
+        screen.blit(self.background, (0,0))
         pg.draw.rect(screen, (220,220,0), (0,0,32,32))
         
         self.car.update(0.55,0.6)
