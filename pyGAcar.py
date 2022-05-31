@@ -123,17 +123,18 @@ class Car:
 
 
         sensR_idx = [int(i) for i in sensR] 
-        print(course[sensR_idx[1],sensR_idx[0]])
-#        sensCol = 0
-#        sensCol_Hi = (200,200,0)
-#        sensCol_Low = (50,50,0)
-#        if course[sensR[0],sensR[1]] > 200:
-#            sensCol = sensCol_Hi
-#        else:
-#            sensCol = sensCol_Low
-#
-#        pg.draw.circle(screen,sensCol, sensR,4)
-        pg.draw.circle(screen,(200,200,0), sensL,4)
+        sensL_idx = [int(i) for i in sensL] 
+        #print(course[sensR_idx[1],sensR_idx[0]])
+        sensCol_Hi = (200,200,0)
+        sensCol_Low = (50,50,0)
+        sensCol_R = sensCol_Low
+        sensCol_L = sensCol_Low
+        if course[sensR_idx[1],sensR_idx[0]] > 200:
+            sensCol_R = sensCol_Hi
+        if course[sensL_idx[1],sensL_idx[0]] > 200:
+            sensCol_L = sensCol_Hi
+        pg.draw.circle(screen, sensCol_R, sensR,4)
+        pg.draw.circle(screen, sensCol_L, sensL,4)
         
 
 
