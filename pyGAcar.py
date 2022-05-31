@@ -114,11 +114,9 @@ class Car:
             self.sy += WINDOW_H
         if self.sy >= WINDOW_H:
             self.sy -= WINDOW_H
-
-
         
-    def draw(self):
         body,sensR,sensL,tireR,tireL = drawCar(self.sx,self.sy,self.sq)
+        
         pg.draw.polygon(screen,(100,100,100), body)
         pg.draw.polygon(screen,(80,100,100), tireR)
         pg.draw.polygon(screen,(80,100,100), tireL)
@@ -129,9 +127,10 @@ class Car:
 
 class Simulation:
     def __init__(self):
+        bgd = load_image('course1.jpg')
+        self.background = pg.Surface(SCREENRECT.size)
+        self.background.blit(bgd,(0,0))
         self.car = Car(300,300)
-        self.background = load_image('course1.jpg')
-        #self.background = pg.Surface(SCREENRECT.size)
     
     def mainloop(self,running):
         for event in pg.event.get():
@@ -148,7 +147,7 @@ class Simulation:
         pg.draw.rect(screen, (220,220,0), (0,0,32,32))
         
         self.car.update(0.55,0.6)
-        self.car.draw()
+        
         
         return running
     
@@ -165,6 +164,14 @@ screen = pg.display.set_mode([WINDOW_W, WINDOW_H])
 pg.display.set_caption("tameshi base")
 clock = pg.time.Clock()
 mono_font = pg.font.Font("/usr/share/fonts/truetype/ubuntu-font-family/UbuntuMono-R.ttf", 20)
+
+
+# bgd = load_image('course1.jpg')
+# background = pg.Surface(SCREENRECT.size)
+# background.blit(bgd,(0,0))
+# pxarray = pg.PixelArray(background)
+# print(pxarray)
+
 
 sim = Simulation()
 running = True
