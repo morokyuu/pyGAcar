@@ -11,6 +11,7 @@ import pygame as pg
 import random
 import numpy as np
 import os
+from PIL import Image
 
 # window size
 WINDOW_W = 640
@@ -96,7 +97,7 @@ class Car:
         self.sy = init_y
         self.sq = 0
         
-    def update(self,vel_L,vel_R):
+    def update(self,vel_L,vel_R,course):
         vel_L *= -1
         vel_R *= -1
         t_sq = (vel_L - vel_R) / BODY_W
@@ -116,21 +117,31 @@ class Car:
             self.sy -= WINDOW_H
         
         body,sensR,sensL,tireR,tireL = drawCar(self.sx,self.sy,self.sq)
-        
         pg.draw.polygon(screen,(100,100,100), body)
         pg.draw.polygon(screen,(80,100,100), tireR)
         pg.draw.polygon(screen,(80,100,100), tireL)
-        pg.draw.circle(screen,(200,200,0), sensR,4)
+
+
+        sensR_idx = [int(i) for i in sensR] 
+        print(course[sensR_idx[1],sensR_idx[0]])
+#        sensCol = 0
+#        sensCol_Hi = (200,200,0)
+#        sensCol_Low = (50,50,0)
+#        if course[sensR[0],sensR[1]] > 200:
+#            sensCol = sensCol_Hi
+#        else:
+#            sensCol = sensCol_Low
+#
+#        pg.draw.circle(screen,sensCol, sensR,4)
         pg.draw.circle(screen,(200,200,0), sensL,4)
         
 
 
 class Simulation:
     def __init__(self):
-        bgd = load_image('course1.jpg')
-        self.background = pg.Surface(SCREENRECT.size)
-        self.background.blit(bgd,(0,0))
+        self.background = load_image('course1.jpg')
         self.car = Car(300,300)
+        self.coursePix = np.array(Image.open('data/course1.jpg').convert('L'))
     
     def mainloop(self,running):
         for event in pg.event.get():
@@ -146,7 +157,7 @@ class Simulation:
         screen.blit(self.background, (0,0))
         pg.draw.rect(screen, (220,220,0), (0,0,32,32))
         
-        self.car.update(0.55,0.6)
+        self.car.update(0.55,0.6,self.coursePix)
         
         
         return running
@@ -164,14 +175,6 @@ screen = pg.display.set_mode([WINDOW_W, WINDOW_H])
 pg.display.set_caption("tameshi base")
 clock = pg.time.Clock()
 mono_font = pg.font.Font("/usr/share/fonts/truetype/ubuntu-font-family/UbuntuMono-R.ttf", 20)
-
-
-# bgd = load_image('course1.jpg')
-# background = pg.Surface(SCREENRECT.size)
-# background.blit(bgd,(0,0))
-# pxarray = pg.PixelArray(background)
-# print(pxarray)
-
 
 sim = Simulation()
 running = True
