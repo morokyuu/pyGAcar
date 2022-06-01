@@ -12,6 +12,8 @@ import random
 import numpy as np
 import os
 from PIL import Image
+from enum import Enum
+
 
 # window size
 WINDOW_W = 640
@@ -23,6 +25,10 @@ main_dir = os.path.split(os.path.abspath(__file__))[0]
 # frame rate
 FPS = 60
 fpsClock = pg.time.Clock()
+
+# define
+BLACK = 0
+WHITE = 1
 
 # polygon usage
 # https://programtalk.com/python-examples/pygame.draw.polygon/
@@ -92,12 +98,13 @@ def drawCar(x,y,th):
 
 
 class Car:
+
     def __init__(self,init_x,init_y):
         self.sx = init_x
         self.sy = init_y
         self.sq = 0
-        
-    def update(self,vel_L,vel_R,course):
+
+    def move(self,vel_L,vel_R):
         vel_L *= -1
         vel_R *= -1
         t_sq = (vel_L - vel_R) / BODY_W
@@ -115,28 +122,31 @@ class Car:
             self.sy += WINDOW_H
         if self.sy >= WINDOW_H:
             self.sy -= WINDOW_H
+    
+    def sense(self,sensR,sensL,course):
+        # position of sensorL,R
+        sensR_idx = [int(i) for i in sensR] 
+        sensL_idx = [int(i) for i in sensL] 
+        # reading pixel value
+        resL = resR = BLACK
+        if course[sensR_idx[1],sensR_idx[0]] > 200:
+            resR = WHITE
+        if course[sensL_idx[1],sensL_idx[0]] > 200:
+            resL = WHITE
+        return resL,resR
+
+    def update(self,vel_L,vel_R,course):
+        self.move(vel_L, vel_R)
         
         body,sensR,sensL,tireR,tireL = drawCar(self.sx,self.sy,self.sq)
+        resL,resR = self.sense(sensR,sensL,course)
+
         pg.draw.polygon(screen,(100,100,100), body)
         pg.draw.polygon(screen,(80,100,100), tireR)
         pg.draw.polygon(screen,(80,100,100), tireL)
-
-
-        sensR_idx = [int(i) for i in sensR] 
-        sensL_idx = [int(i) for i in sensL] 
-        #print(course[sensR_idx[1],sensR_idx[0]])
-        sensCol_Hi = (200,200,0)
-        sensCol_Low = (50,50,0)
-        sensCol_R = sensCol_Low
-        sensCol_L = sensCol_Low
-        if course[sensR_idx[1],sensR_idx[0]] > 200:
-            sensCol_R = sensCol_Hi
-        if course[sensL_idx[1],sensL_idx[0]] > 200:
-            sensCol_L = sensCol_Hi
-        pg.draw.circle(screen, sensCol_R, sensR,4)
-        pg.draw.circle(screen, sensCol_L, sensL,4)
-        
-
+        sensCol = [(200,200,0),(50,50,0)]
+        pg.draw.circle(screen, sensCol[resL], sensL,4)
+        pg.draw.circle(screen, sensCol[resR], sensR,4)
 
 class Simulation:
     def __init__(self):
