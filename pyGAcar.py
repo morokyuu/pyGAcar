@@ -23,7 +23,7 @@ SCREENRECT = pg.Rect(0,0,640,480)
 main_dir = os.path.split(os.path.abspath(__file__))[0]
 
 # frame rate
-FPS = 60
+FPS = 240
 fpsClock = pg.time.Clock()
 
 # define
@@ -123,10 +123,25 @@ class Car:
         if self.sy >= WINDOW_H:
             self.sy -= WINDOW_H
     
+
+    def clamp(self,n,smallest,largest):
+        return max(smallest,min(n,largest))
+    
     def sense(self,sensR,sensL,course):
+        #print(f"{sensL[0]},{sensL[1]}")
+        print(f"{sensR[0]},{sensR[1]}")
+
         # position of sensorL,R
-        sensR_idx = [int(i) for i in sensR] 
-        sensL_idx = [int(i) for i in sensL] 
+#        sensR_idx = [int(i) for i in sensR] 
+#        sensL_idx = [int(i) for i in sensL] 
+
+        sensR_idx = []
+        sensR_idx.append( int(self.clamp(sensR[0], 0, WINDOW_W-1)) )
+        sensR_idx.append( int(self.clamp(sensR[1], 0, WINDOW_H-1)) )
+        sensL_idx = []
+        sensL_idx.append( int(self.clamp(sensL[0], 0, WINDOW_W-1)) )
+        sensL_idx.append( int(self.clamp(sensL[1], 0, WINDOW_H-1)) )
+
         # reading pixel value
         resL = resR = BLACK
         if course[sensR_idx[1],sensR_idx[0]] > 200:
@@ -135,18 +150,33 @@ class Car:
             resL = WHITE
         return resL,resR
 
+    def get_state(self):
+        state = 0
+        if self.resL == BLACK and self.resR == BLACK:
+            state = 0
+        elif self.resL == BLACK and self.resR == WHITE:
+            state = 1 
+        elif self.resL == WHITE and self.resR == BLACK:
+            state = 2 
+        elif self.resL == WHITE and self.resR == WHITE:
+            state = 3
+        return state
+
     def update(self,vel_L,vel_R,course):
         self.move(vel_L, vel_R)
         
         body,sensR,sensL,tireR,tireL = drawCar(self.sx,self.sy,self.sq)
-        resL,resR = self.sense(sensR,sensL,course)
+        self.resL,self.resR = self.sense(sensR,sensL,course)
 
         pg.draw.polygon(screen,(100,100,100), body)
         pg.draw.polygon(screen,(80,100,100), tireR)
         pg.draw.polygon(screen,(80,100,100), tireL)
         sensCol = [(200,200,0),(50,50,0)]
-        pg.draw.circle(screen, sensCol[resL], sensL,4)
-        pg.draw.circle(screen, sensCol[resR], sensR,4)
+        pg.draw.circle(screen, sensCol[self.resL], sensL,4)
+        pg.draw.circle(screen, sensCol[self.resR], sensR,4)
+
+        state = self.get_state()
+        print(f"{self.resL}, {self.resR}, {state}")
 
 class Simulation:
     def __init__(self):
