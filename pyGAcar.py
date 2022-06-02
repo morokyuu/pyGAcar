@@ -128,19 +128,15 @@ class Car:
         return max(smallest,min(n,largest))
     
     def sense(self,sensR,sensL,course):
-        #print(f"{sensL[0]},{sensL[1]}")
-        print(f"{sensR[0]},{sensR[1]}")
-
         # position of sensorL,R
-#        sensR_idx = [int(i) for i in sensR] 
-#        sensL_idx = [int(i) for i in sensL] 
-
-        sensR_idx = []
-        sensR_idx.append( int(self.clamp(sensR[0], 0, WINDOW_W-1)) )
-        sensR_idx.append( int(self.clamp(sensR[1], 0, WINDOW_H-1)) )
-        sensL_idx = []
-        sensL_idx.append( int(self.clamp(sensL[0], 0, WINDOW_W-1)) )
-        sensL_idx.append( int(self.clamp(sensL[1], 0, WINDOW_H-1)) )
+        sensR_idx = [
+            int(self.clamp(sensR[0], 0, WINDOW_W-1)),
+            int(self.clamp(sensR[1], 0, WINDOW_H-1))
+        ]
+        sensL_idx = [
+            int(self.clamp(sensL[0], 0, WINDOW_W-1)),
+            int(self.clamp(sensL[1], 0, WINDOW_H-1))
+        ]
 
         # reading pixel value
         resL = resR = BLACK
@@ -171,7 +167,7 @@ class Car:
         pg.draw.polygon(screen,(100,100,100), body)
         pg.draw.polygon(screen,(80,100,100), tireR)
         pg.draw.polygon(screen,(80,100,100), tireL)
-        sensCol = [(200,200,0),(50,50,0)]
+        sensCol = [(50,50,0),(200,200,0)]
         pg.draw.circle(screen, sensCol[self.resL], sensL,4)
         pg.draw.circle(screen, sensCol[self.resR], sensR,4)
 
