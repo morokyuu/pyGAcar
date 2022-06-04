@@ -186,11 +186,16 @@ class Car:
 class GA:
     def __init__(self):
         self.genes = []
+        self.make_first_generation()
         pass
 
     def make_first_generation(self):
         for _ in range(CAR_NUM):
             self.genes.append([random.choice([1,0]) for _ in range(GEN_NUM)])
+    
+    def get_gene(self, i):
+        return self.genes[i]
+
 
 
 
@@ -238,6 +243,8 @@ class Simulation:
 
 ga = GA()
 ga.make_first_generation()
+
+print(ga.get_gene(0))
 
 ##pg.init()
 ##
