@@ -30,6 +30,14 @@ fpsClock = pg.time.Clock()
 BLACK = 0
 WHITE = 1
 
+# define 
+SIM_COUNT=1000
+STATE_T_NUM=3 # num of previous data
+STATE_NUM=4**STATE_T_NUM
+ACTION_NUM=5*2 #speed:5bit * 2motor
+GEN_NUM=ACTION_NUM*STATE_NUM # length of single gene
+CAR_NUM=10 # number of trial
+
 # polygon usage
 # https://programtalk.com/python-examples/pygame.draw.polygon/
 
@@ -174,13 +182,30 @@ class Car:
         state = self.get_state()
         print(f"{self.resL}, {self.resR}, {state}")
 
-class Simulation:
+
+class GA:
     def __init__(self):
+        self.genes = []
+        pass
+
+    def make_first_generation(self):
+        for _ in range(CAR_NUM):
+            self.genes.append([random.choice([1,0]) for _ in range(GEN_NUM)])
+
+
+
+
+class Simulation:
+    def __init__(self,intx,inty):
+        # for display
         self.background = load_image('course1.jpg')
-        self.car = Car(300,300)
+        # as a ndarray for sensing
         self.coursePix = np.array(Image.open('data/course1.jpg').convert('L'))
+        # init car
+        self.car = Car(intx,inty)
+
     
-    def mainloop(self,running):
+    def keyIn(self):
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 running = False
@@ -189,14 +214,19 @@ class Simulation:
                     btn_space = True
                 elif event.key == pg.K_ESCAPE:
                     running = False
-        
+        return running
+
+    
+    def mainloop(self):
+        running = keyIn()
+        if running == False:
+            return False
+    
         screen.fill((0,0,0))
         screen.blit(self.background, (0,0))
         pg.draw.rect(screen, (220,220,0), (0,0,32,32))
-        
         self.car.update(0.55,0.6,self.coursePix)
-        
-        
+
         return running
     
 
@@ -206,20 +236,23 @@ class Simulation:
 # start
 # =============================================================================
 
-pg.init()
+ga = GA()
+ga.make_first_generation()
 
-screen = pg.display.set_mode([WINDOW_W, WINDOW_H])
-pg.display.set_caption("tameshi base")
-clock = pg.time.Clock()
-mono_font = pg.font.Font("/usr/share/fonts/truetype/ubuntu-font-family/UbuntuMono-R.ttf", 20)
-
-sim = Simulation()
-running = True
-
-while running:
-    running = sim.mainloop(running)
-    
-    pg.display.flip()
-    fpsClock.tick(FPS)
-
-pg.quit()
+##pg.init()
+##
+##screen = pg.display.set_mode([WINDOW_W, WINDOW_H])
+##pg.display.set_caption("tameshi base")
+##clock = pg.time.Clock()
+##mono_font = pg.font.Font("/usr/share/fonts/truetype/ubuntu-font-family/UbuntuMono-R.ttf", 20)
+##
+##sim = Simulation(300,300)
+##running = True
+##
+##while running:
+##    running = sim.mainloop()
+##    
+##    pg.display.flip()
+##    fpsClock.tick(FPS)
+##
+##pg.quit()
