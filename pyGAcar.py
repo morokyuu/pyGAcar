@@ -269,11 +269,12 @@ if True:
 
     stidx = sum([s * STATE_PATTERN**n for n,s in enumerate(state[::-1])])
     gene = ga.get_gene(car)
+    
+    idx = stidx*ACTION_NUM
+    gene_part = gene[idx:idx+ACTION_NUM]
+    print(gene_part)
 
-    gene_split = list(gene[i:i+ACTION_NUM] for i in range(0,len(gene),ACTION_NUM))
-    print(gene_split[0])
-
-    left,right = bin2int(gene_split[0])
+    left,right = bin2int(gene_part)
     print(f"{left},{right}")
     
 else:
