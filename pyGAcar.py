@@ -108,30 +108,14 @@ def calc_car_position(x,y,th):
 
 class Car:
 
-    def __init__(self,init_x,init_y):
-        self.sx = init_x
-        self.sy = init_y
+    def __init__(self,gene):
+        self.sx = 500 
+        self.sy = 330
         self.sq = 0
         self.state_t = []
+        self.gene = gene
+        self.score = 0
 
-    def move(self,vel_L,vel_R):
-        vel_L *= -1
-        vel_R *= -1
-        t_sq = (vel_L - vel_R) / BODY_W
-        t_vel = (vel_L + vel_R) / 2.0
-        
-        self.sq += t_sq
-        self.sx += t_vel * np.sin(self.sq)
-        self.sy += t_vel * np.cos(self.sq)
-
-        if self.sx < 0:
-            self.sx += WINDOW_W
-        if self.sx >= WINDOW_W:
-            self.sx -= WINDOW_W
-        if self.sy < 0:
-            self.sy += WINDOW_H
-        if self.sy >= WINDOW_H:
-            self.sy -= WINDOW_H
     
 
     def clamp(self,n,smallest,largest):
@@ -166,20 +150,67 @@ class Car:
             state = 3
         return state
 
-    def update(self,vel_L,vel_R,course):
-        self.move(vel_L, vel_R)
-        
-        body,sensR,sensL,tireR,tireL = calc_car_position(self.sx,self.sy,self.sq)
-        state = self.get_state(sensR,sensL,course)
+    def get_sensor(self,course):
+        self.body,self.sensR,self.sensL,self.tireR,self.tireL = calc_car_position(self.sx,self.sy,self.sq)
+        state = self.get_state(self.sensR,self.sensL,course)
 
         self.state_t = self.state_t + [state]
-        if len(self.state_t) > STATE_PATTERN:
+        if len(self.state_t) > STATE_PATTERN-1:
             self.state_t = self.state_t[1:]
         print(self.state_t)
 
-        pg.draw.polygon(screen,(100,100,100), body)
-        pg.draw.polygon(screen,(80,100,100), tireR)
-        pg.draw.polygon(screen,(80,100,100), tireL)
+    def bin2int(self,gene_part):
+        sep = int(ACTION_NUM/2)
+        left  = int(''.join([str(g) for g in gene_part[:sep]]),2)
+        right = int(''.join([str(g) for g in gene_part[sep:ACTION_NUM]]),2)
+        return left,right
+
+    def set_action(self):
+        stidx = sum([s * STATE_PATTERN**n for n,s in enumerate(self.state_t[::-1])])
+
+        idx = stidx*ACTION_NUM
+        gene_part = self.gene[idx:idx+ACTION_NUM]
+        print(f"idx={idx},gene_part={gene_part}")
+
+        left,right = self.bin2int(gene_part)
+        vel_L = speed_tbl[left]
+        vel_R = speed_tbl[right]
+        #print(f"gene_part={gene_part}, left,right={left},{right}")
+
+        if self.state_t[-1] == 1 or self.state_t[-1] == 2:
+            self.score += abs(vel_L + vel_R) / 2.0
+        else:
+            self.score += abs(vel_L + vel_R) / 2.0 * 0.2
+        return vel_L, vel_R
+
+    def move(self,vel_L,vel_R):
+        vel_L *= -1
+        vel_R *= -1
+        t_sq = (vel_L - vel_R) / BODY_W
+        t_vel = (vel_L + vel_R) / 2.0
+        
+        self.sq += t_sq
+        self.sx += t_vel * np.sin(self.sq)
+        self.sy += t_vel * np.cos(self.sq)
+
+        if self.sx < 0:
+            self.sx += WINDOW_W
+        if self.sx >= WINDOW_W:
+            self.sx -= WINDOW_W
+        if self.sy < 0:
+            self.sy += WINDOW_H
+        if self.sy >= WINDOW_H:
+            self.sy -= WINDOW_H
+
+    def run(self,course):
+        self.get_sensor(course)
+        vel_L,vel_R = self.set_action()
+
+        self.move(vel_L,vel_R)
+
+        pg.draw.polygon(screen,(100,100,100), self.body)
+        pg.draw.polygon(screen,(80,100,100), self.tireR)
+        pg.draw.polygon(screen,(80,100,100), self.tireL)
         sensCol = [(50,50,0),(200,200,0)]
         sensPat = [
             [sensCol[0],sensCol[0]],
@@ -187,14 +218,12 @@ class Car:
             [sensCol[1],sensCol[0]],
             [sensCol[1],sensCol[1]],
         ]
-        pg.draw.circle(screen, sensPat[state][0], sensL,4)
-        pg.draw.circle(screen, sensPat[state][1], sensR,4)
+        pg.draw.circle(screen, sensPat[self.state_t[-1]][0], self.sensL,4)
+        pg.draw.circle(screen, sensPat[self.state_t[-1]][1], self.sensR,4)
 
         #print(f"{self.resL}, {self.resR}, {state}")
 
-    def set_action(self):
-        
-        pass
+
 
 class GA:
     def __init__(self):
@@ -219,30 +248,40 @@ class Simulation:
         self.background = load_image('course1.jpg')
         # as a ndarray for sensing
         self.coursePix = np.array(Image.open('data/course1.jpg').convert('L'))
-        # init car
-        self.car = Car(intx,inty)
 
-        self.running = True
-
-    
+        # generate genes
+        self.ga = GA()
+        self.ga.make_first_generation()
 
     
-    def mainloop(self):
-    
-        screen.fill((0,0,0))
-        screen.blit(self.background, (0,0))
-        pg.draw.rect(screen, (220,220,0), (0,0,32,32))
-        self.car.update(0.55,0.6,self.coursePix)
+    def loop_sim(self,car):
+        for t in range(SIM_COUNT):
+            screen.fill((0,0,0))
+            screen.blit(self.background,(0,0))
 
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
-                self.running = False
-            if event.type == pg.KEYDOWN:
-                if event.key == pg.K_SPACE:
-                    btn_space = True
-                elif event.key == pg.K_ESCAPE:
+            info = mono_font.render("time"+str(t), True, (255,0,0))
+            screen.blit(info, (20,20))
+
+            car.run(self.coursePix)
+
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
                     self.running = False
-        return self.running
+                if event.type == pg.KEYDOWN:
+                    if event.key == pg.K_SPACE:
+                        btn_space = True
+                    elif event.key == pg.K_ESCAPE:
+                        self.running = False
+
+            pg.display.flip()
+            fpsClock.tick(FPS)
+
+    def execute(self):
+        self.running = True
+        self.car = list(Car(self.ga.get_gene(i)) for i in range(CAR_NUM))
+#        for c in self.car:
+#            self.loop_sim(c)
+        self.loop_sim(self.car[0])
     
 
 
@@ -251,15 +290,11 @@ class Simulation:
 # start
 # =============================================================================
 
-speed_tbl = np.linspace(-5,5,32)
+speed_tbl = np.linspace(-1,1,32)
 
-def bin2int(gene_part):
-    sep = int(ACTION_NUM/2)
-    left  = int(''.join([str(g) for g in gene_part[:sep]]),2)
-    right = int(''.join([str(g) for g in gene_part[sep:ACTION_NUM]]),2)
-    return left,right
 
-if True:
+if False:
+#if True:
     ga = GA()
     ga.make_first_generation()
     #print(ga.get_gene(0))
@@ -277,6 +312,7 @@ if True:
     left,right = bin2int(gene_part)
     print(f"{left},{right}")
     print(f"{speed_tbl[left]},{speed_tbl[right]}")
+
     
 else:
     pg.init()
@@ -287,12 +323,6 @@ else:
     mono_font = pg.font.Font("/usr/share/fonts/truetype/ubuntu-font-family/UbuntuMono-R.ttf", 20)
 
     sim = Simulation(300,300)
-    running = True
-
-    while running:
-        running = sim.mainloop()
-        
-        pg.display.flip()
-        fpsClock.tick(FPS)
+    sim.execute()
 
     pg.quit()
