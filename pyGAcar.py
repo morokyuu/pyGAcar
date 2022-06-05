@@ -33,9 +33,10 @@ WHITE = 1
 # define 
 SIM_COUNT=1000
 STATE_T_NUM=3 # num of previous data
-STATE_NUM=4**STATE_T_NUM
+STATE_PATTERN = 4
+STATE_NUM=STATE_PATTERN**STATE_T_NUM
 ACTION_NUM=5*2 #speed:5bit * 2motor
-GEN_NUM=ACTION_NUM*STATE_NUM # length of single gene
+GEN_NUM=ACTION_NUM * STATE_NUM # length of single gene
 CAR_NUM=10 # number of trial
 
 # polygon usage
@@ -70,7 +71,7 @@ RADIOUS = 15
 def conv2vertlist(array):
     return list(list(array[:2,i]) for i in range(array.shape[1]))
 
-def drawCar(x,y,th):
+def calc_car_position(x,y,th):
     body = np.array([
         [-BODY_W/2, -50, 1],
         [-BODY_W/2,  20, 1],
@@ -168,11 +169,11 @@ class Car:
     def update(self,vel_L,vel_R,course):
         self.move(vel_L, vel_R)
         
-        body,sensR,sensL,tireR,tireL = drawCar(self.sx,self.sy,self.sq)
+        body,sensR,sensL,tireR,tireL = calc_car_position(self.sx,self.sy,self.sq)
         state = self.get_state(sensR,sensL,course)
 
         self.state_t = self.state_t + [state]
-        if len(self.state_t) > STATE_T_NUM+1:
+        if len(self.state_t) > STATE_PATTERN:
             self.state_t = self.state_t[1:]
         print(self.state_t)
 
@@ -192,6 +193,7 @@ class Car:
         #print(f"{self.resL}, {self.resR}, {state}")
 
     def set_action(self):
+        
         pass
 
 class GA:
@@ -249,24 +251,46 @@ class Simulation:
 # start
 # =============================================================================
 
-#ga = GA()
-#ga.make_first_generation()
-#print(ga.get_gene(0))
+speed_tbl = np.linspace(-5,5,32)
 
-pg.init()
+def bin2int(gene_part):
+    sep = int(ACTION_NUM/2)
+    left  = int(''.join([str(g) for g in gene_part[:sep]]),2)
+    right = int(''.join([str(g) for g in gene_part[sep:ACTION_NUM]]),2)
+    return left,right
 
-screen = pg.display.set_mode([WINDOW_W, WINDOW_H])
-pg.display.set_caption("tameshi base")
-clock = pg.time.Clock()
-mono_font = pg.font.Font("/usr/share/fonts/truetype/ubuntu-font-family/UbuntuMono-R.ttf", 20)
+if True:
+    ga = GA()
+    ga.make_first_generation()
+    #print(ga.get_gene(0))
 
-sim = Simulation(300,300)
-running = True
+    state = [3,3,3]
+    car = 0
 
-while running:
-    running = sim.mainloop()
+    stidx = sum([s * STATE_PATTERN**n for n,s in enumerate(state[::-1])])
+    gene = ga.get_gene(car)
+
+    gene_split = list(gene[i:i+ACTION_NUM] for i in range(0,len(gene),ACTION_NUM))
+    print(gene_split[0])
+
+    left,right = bin2int(gene_split[0])
+    print(f"{left},{right}")
     
-    pg.display.flip()
-    fpsClock.tick(FPS)
+else:
+    pg.init()
 
-pg.quit()
+    screen = pg.display.set_mode([WINDOW_W, WINDOW_H])
+    pg.display.set_caption("tameshi base")
+    clock = pg.time.Clock()
+    mono_font = pg.font.Font("/usr/share/fonts/truetype/ubuntu-font-family/UbuntuMono-R.ttf", 20)
+
+    sim = Simulation(300,300)
+    running = True
+
+    while running:
+        running = sim.mainloop()
+        
+        pg.display.flip()
+        fpsClock.tick(FPS)
+
+    pg.quit()
