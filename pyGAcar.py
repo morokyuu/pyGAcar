@@ -111,6 +111,7 @@ class Car:
         self.sx = init_x
         self.sy = init_y
         self.sq = 0
+        self.state_t = []
 
     def move(self,vel_L,vel_R):
         vel_L *= -1
@@ -154,15 +155,15 @@ class Car:
             resL = WHITE
         return resL,resR
 
-    def get_state(self):
+    def get_state(self,resL,resR):
         state = 0
-        if self.resL == BLACK and self.resR == BLACK:
+        if resL == BLACK and resR == BLACK:
             state = 0
-        elif self.resL == BLACK and self.resR == WHITE:
+        elif resL == BLACK and resR == WHITE:
             state = 1 
-        elif self.resL == WHITE and self.resR == BLACK:
+        elif resL == WHITE and resR == BLACK:
             state = 2 
-        elif self.resL == WHITE and self.resR == WHITE:
+        elif resL == WHITE and resR == WHITE:
             state = 3
         return state
 
@@ -170,17 +171,22 @@ class Car:
         self.move(vel_L, vel_R)
         
         body,sensR,sensL,tireR,tireL = drawCar(self.sx,self.sy,self.sq)
-        self.resL,self.resR = self.sense(sensR,sensL,course)
+        resL,resR = self.sense(sensR,sensL,course)
+        state = self.get_state(resL,resR)
+
+        self.state_t = self.state_t + [state]
+        if len(self.state_t) > STATE_T_NUM+1:
+            self.state_t = self.state_t[1:]
+        print(self.state_t)
 
         pg.draw.polygon(screen,(100,100,100), body)
         pg.draw.polygon(screen,(80,100,100), tireR)
         pg.draw.polygon(screen,(80,100,100), tireL)
         sensCol = [(50,50,0),(200,200,0)]
-        pg.draw.circle(screen, sensCol[self.resL], sensL,4)
-        pg.draw.circle(screen, sensCol[self.resR], sensR,4)
+        pg.draw.circle(screen, sensCol[resL], sensL,4)
+        pg.draw.circle(screen, sensCol[resR], sensR,4)
 
-        state = self.get_state()
-        print(f"{self.resL}, {self.resR}, {state}")
+        #print(f"{self.resL}, {self.resR}, {state}")
 
 
 class GA:
@@ -209,30 +215,27 @@ class Simulation:
         # init car
         self.car = Car(intx,inty)
 
+        self.running = True
+
     
-    def keyIn(self):
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
-                running = False
-            if event.type == pg.KEYDOWN:
-                if event.key == pg.K_SPACE:
-                    btn_space = True
-                elif event.key == pg.K_ESCAPE:
-                    running = False
-        return running
 
     
     def mainloop(self):
-        running = keyIn()
-        if running == False:
-            return False
     
         screen.fill((0,0,0))
         screen.blit(self.background, (0,0))
         pg.draw.rect(screen, (220,220,0), (0,0,32,32))
         self.car.update(0.55,0.6,self.coursePix)
 
-        return running
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                self.running = False
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_SPACE:
+                    btn_space = True
+                elif event.key == pg.K_ESCAPE:
+                    self.running = False
+        return self.running
     
 
 
@@ -241,25 +244,24 @@ class Simulation:
 # start
 # =============================================================================
 
-ga = GA()
-ga.make_first_generation()
+#ga = GA()
+#ga.make_first_generation()
+#print(ga.get_gene(0))
 
-print(ga.get_gene(0))
+pg.init()
 
-##pg.init()
-##
-##screen = pg.display.set_mode([WINDOW_W, WINDOW_H])
-##pg.display.set_caption("tameshi base")
-##clock = pg.time.Clock()
-##mono_font = pg.font.Font("/usr/share/fonts/truetype/ubuntu-font-family/UbuntuMono-R.ttf", 20)
-##
-##sim = Simulation(300,300)
-##running = True
-##
-##while running:
-##    running = sim.mainloop()
-##    
-##    pg.display.flip()
-##    fpsClock.tick(FPS)
-##
-##pg.quit()
+screen = pg.display.set_mode([WINDOW_W, WINDOW_H])
+pg.display.set_caption("tameshi base")
+clock = pg.time.Clock()
+mono_font = pg.font.Font("/usr/share/fonts/truetype/ubuntu-font-family/UbuntuMono-R.ttf", 20)
+
+sim = Simulation(300,300)
+running = True
+
+while running:
+    running = sim.mainloop()
+    
+    pg.display.flip()
+    fpsClock.tick(FPS)
+
+pg.quit()
