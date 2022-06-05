@@ -276,6 +276,7 @@ if True:
 
     left,right = bin2int(gene_part)
     print(f"{left},{right}")
+    print(f"{speed_tbl[left]},{speed_tbl[right]}")
     
 else:
     pg.init()
