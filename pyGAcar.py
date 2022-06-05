@@ -135,8 +135,8 @@ class Car:
 
     def clamp(self,n,smallest,largest):
         return max(smallest,min(n,largest))
-    
-    def sense(self,sensR,sensL,course):
+
+    def get_state(self,sensR,sensL,course):
         # position of sensorL,R
         sensR_idx = [
             int(self.clamp(sensR[0], 0, WINDOW_W-1)),
@@ -153,9 +153,7 @@ class Car:
             resR = WHITE
         if course[sensL_idx[1],sensL_idx[0]] > 200:
             resL = WHITE
-        return resL,resR
 
-    def get_state(self,resL,resR):
         state = 0
         if resL == BLACK and resR == BLACK:
             state = 0
@@ -171,8 +169,7 @@ class Car:
         self.move(vel_L, vel_R)
         
         body,sensR,sensL,tireR,tireL = drawCar(self.sx,self.sy,self.sq)
-        resL,resR = self.sense(sensR,sensL,course)
-        state = self.get_state(resL,resR)
+        state = self.get_state(sensR,sensL,course)
 
         self.state_t = self.state_t + [state]
         if len(self.state_t) > STATE_T_NUM+1:
@@ -183,11 +180,19 @@ class Car:
         pg.draw.polygon(screen,(80,100,100), tireR)
         pg.draw.polygon(screen,(80,100,100), tireL)
         sensCol = [(50,50,0),(200,200,0)]
-        pg.draw.circle(screen, sensCol[resL], sensL,4)
-        pg.draw.circle(screen, sensCol[resR], sensR,4)
+        sensPat = [
+            [sensCol[0],sensCol[0]],
+            [sensCol[0],sensCol[1]],
+            [sensCol[1],sensCol[0]],
+            [sensCol[1],sensCol[1]],
+        ]
+        pg.draw.circle(screen, sensPat[state][0], sensL,4)
+        pg.draw.circle(screen, sensPat[state][1], sensR,4)
 
         #print(f"{self.resL}, {self.resR}, {state}")
 
+    def set_action(self):
+        pass
 
 class GA:
     def __init__(self):
