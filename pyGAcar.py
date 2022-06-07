@@ -4,6 +4,14 @@
 Created on Sat May 28 09:19:09 2022
 
 @author: zotac
+
+
+フォントの描画
+https://shizenkarasuzon.hatenablog.com/entry/2018/12/29/203344
+
+f format文法
+https://gammasoft.jp/blog/python-f-string/
+
 """
 
 
@@ -23,6 +31,7 @@ SCREENRECT = pg.Rect(0,0,640,480)
 main_dir = os.path.split(os.path.abspath(__file__))[0]
 
 # frame rate
+#FPS = 60
 FPS = 240
 fpsClock = pg.time.Clock()
 
@@ -31,7 +40,8 @@ BLACK = 0
 WHITE = 1
 
 # define 
-SIM_COUNT=1000
+#SIM_COUNT=1000
+SIM_COUNT=300
 STATE_T_NUM=3 # num of previous data
 STATE_PATTERN = 4
 STATE_NUM=STATE_PATTERN**STATE_T_NUM
@@ -107,16 +117,13 @@ def calc_car_position(x,y,th):
 
 
 class Car:
-
-    def __init__(self,gene):
-        self.sx = 500 
-        self.sy = 330
+    def __init__(self,gene,ini_sx=530,ini_sy=330):
+        self.sx = ini_sx
+        self.sy = ini_sy
         self.sq = 0
         self.state_t = []
         self.gene = gene
         self.score = 0
-
-    
 
     def clamp(self,n,smallest,largest):
         return max(smallest,min(n,largest))
@@ -157,7 +164,7 @@ class Car:
         self.state_t = self.state_t + [state]
         if len(self.state_t) > STATE_PATTERN-1:
             self.state_t = self.state_t[1:]
-        print(self.state_t)
+        print(f"self.state_t={self.state_t}")
 
     def bin2int(self,gene_part):
         sep = int(ACTION_NUM/2)
@@ -176,12 +183,13 @@ class Car:
         vel_L = speed_tbl[left]
         vel_R = speed_tbl[right]
         #print(f"gene_part={gene_part}, left,right={left},{right}")
+        return vel_L, vel_R
 
+    def calc_score(self, vel_L, vel_R):
         if self.state_t[-1] == 1 or self.state_t[-1] == 2:
             self.score += abs(vel_L + vel_R) / 2.0
         else:
             self.score += abs(vel_L + vel_R) / 2.0 * 0.2
-        return vel_L, vel_R
 
     def move(self,vel_L,vel_R):
         vel_L *= -1
@@ -205,6 +213,7 @@ class Car:
     def run(self,course):
         self.get_sensor(course)
         vel_L,vel_R = self.set_action()
+        self.calc_score(vel_L,vel_R)
 
         self.move(vel_L,vel_R)
 
@@ -243,7 +252,7 @@ class GA:
 
 
 class Simulation:
-    def __init__(self,intx,inty):
+    def __init__(self):
         # for display
         self.background = load_image('course1.jpg')
         # as a ndarray for sensing
@@ -259,10 +268,11 @@ class Simulation:
             screen.fill((0,0,0))
             screen.blit(self.background,(0,0))
 
-            info = mono_font.render("time"+str(t), True, (255,0,0))
-            screen.blit(info, (20,20))
-
             car.run(self.coursePix)
+
+            info_str = f"time={str(t)},score={car.score:5.2f}"
+            info = mono_font.render(info_str, True, (255,0,0))
+            screen.blit(info, (20,20))
 
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -275,13 +285,19 @@ class Simulation:
 
             pg.display.flip()
             fpsClock.tick(FPS)
+        return car.score
 
     def execute(self):
         self.running = True
         self.car = list(Car(self.ga.get_gene(i)) for i in range(CAR_NUM))
-#        for c in self.car:
-#            self.loop_sim(c)
-        self.loop_sim(self.car[0])
+
+        self.result = []
+
+        for n,c in enumerate(self.car):
+            score = self.loop_sim(c)
+            self.result.append((n,score,c.gene))
+        
+        print(self.result)
     
 
 
@@ -295,25 +311,7 @@ speed_tbl = np.linspace(-1,1,32)
 
 if False:
 #if True:
-    ga = GA()
-    ga.make_first_generation()
-    #print(ga.get_gene(0))
-
-    state = [3,3,3]
-    car = 0
-
-    stidx = sum([s * STATE_PATTERN**n for n,s in enumerate(state[::-1])])
-    gene = ga.get_gene(car)
-    
-    idx = stidx*ACTION_NUM
-    gene_part = gene[idx:idx+ACTION_NUM]
-    print(gene_part)
-
-    left,right = bin2int(gene_part)
-    print(f"{left},{right}")
-    print(f"{speed_tbl[left]},{speed_tbl[right]}")
-
-    
+    pass
 else:
     pg.init()
 
@@ -322,7 +320,7 @@ else:
     clock = pg.time.Clock()
     mono_font = pg.font.Font("/usr/share/fonts/truetype/ubuntu-font-family/UbuntuMono-R.ttf", 20)
 
-    sim = Simulation(300,300)
+    sim = Simulation()
     sim.execute()
 
     pg.quit()
