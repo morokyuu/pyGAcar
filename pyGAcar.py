@@ -263,14 +263,14 @@ class Simulation:
         self.ga.make_first_generation()
 
     
-    def loop_sim(self,car):
+    def loop_sim(self,car_num, car):
         for t in range(SIM_COUNT):
             screen.fill((0,0,0))
             screen.blit(self.background,(0,0))
 
             car.run(self.coursePix)
 
-            info_str = f"time={str(t)},score={car.score:5.2f}"
+            info_str = f"car_num={car_num},time={str(t)},score={car.score:5.2f}"
             info = mono_font.render(info_str, True, (255,0,0))
             screen.blit(info, (20,20))
 
@@ -294,9 +294,9 @@ class Simulation:
         self.result = []
 
         for n,c in enumerate(self.car):
-            score = self.loop_sim(c)
-            self.result.append((n,score,c.gene))
-        
+            score = self.loop_sim(n,c)
+            # self.result.append((n,score,c.gene))
+            self.result.append((n,score))
         print(self.result)
     
 
@@ -310,7 +310,7 @@ speed_tbl = np.linspace(-1,1,32)
 
 
 if False:
-#if True:
+# if True:
     pass
 else:
     pg.init()
