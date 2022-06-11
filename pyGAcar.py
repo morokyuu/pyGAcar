@@ -41,7 +41,7 @@ WHITE = 1
 
 # define 
 #SIM_COUNT=1000
-SIM_COUNT=300
+SIM_COUNT=100
 STATE_T_NUM=3 # num of previous data
 STATE_PATTERN = 4
 STATE_NUM=STATE_PATTERN**STATE_T_NUM
@@ -234,7 +234,7 @@ class Car:
 
 
 
-class GA:
+class GA_MANAGER:
     def __init__(self):
         self.genes = []
         self.make_first_generation()
@@ -243,10 +243,76 @@ class GA:
     def make_first_generation(self):
         for _ in range(CAR_NUM):
             self.genes.append([random.choice([1,0]) for _ in range(GEN_NUM)])
+        
+        print("first gen")
+        print(self.genes)
     
     def get_gene(self, i):
         return self.genes[i]
 
+    def choice_by_roulette(self, score_ga, choice_num):
+        #得点を降順にソートしたもの
+        work = sorted(score_ga,key=lambda x: x[1])
+        score_sum = sum([w[0] for w in work])
+    
+        #得点が0から1になるように正規化
+        sortScore = [w[0]/score_sum for w in work]
+        CAR_NUM = len(sortScore)
+        # print(sortScore)
+    
+        #得点を区間に分割 各区間をtuple(開始,終了)にする
+        bins = [0.0] + [sum(sortScore[:n+1]) for n in range(len(sortScore))]
+        bins = [(bins[b0],bins[b0+1]) for b0 in range(len(bins)-1)]
+        # print(bins)
+
+        choices = []
+        for i in range(choice_num):
+            v = random.random()
+            for n,(b0,b1) in enumerate(bins):
+                if b0 <= v and v < b1:
+                    choices.append(work[n])
+        return choices
+
+    def mix(self, ga_list):
+        if len(ga_list) % 2 == 1:
+            raise Exception("len(ga_list) is not even.")
+        
+        new_ga = []
+        for i in range(0,len(ga_list),2):
+            nx = random.randint(1,GEN_NUM-1)
+            # print(nx)
+            new_ga.append(ga_list[i][:nx] + ga_list[i+1][nx:])
+            new_ga.append(ga_list[i+1][:nx] + ga_list[i][nx:])
+        return new_ga
+
+    def mutation(self, ga_list, probability=0.1):
+        new_ga = []
+        for n,ga in enumerate(ga_list):
+            if random.random() < probability:
+                idx = random.randint(0,GEN_NUM-1)
+                if ga[idx] == 1:
+                    ga[idx] = 0
+                else:
+                    ga[idx] = 1
+            new_ga.append(ga)
+        return new_ga
+    
+    def make_next_generation(self, score_ga):
+        work = sorted(score_ga,key=lambda x: x[1])
+
+        self.genes = []
+        self.genes.append(work[0][1])
+        self.genes.append(work[1][1])
+
+        choices = self.choice_by_roulette(work,CAR_NUM-2)
+        ga_list = [g[1] for g in choices]
+
+        ga_list = self.mix(ga_list)
+        ga_list = self.mutation(ga_list)
+        self.genes.append(ga_list)
+
+        print("next gen")
+        print(self.genes)
 
 
 
@@ -259,18 +325,18 @@ class Simulation:
         self.coursePix = np.array(Image.open('data/course1.jpg').convert('L'))
 
         # generate genes
-        self.ga = GA()
+        self.ga = GA_MANAGER()
         self.ga.make_first_generation()
 
     
-    def loop_sim(self,car_num, car):
+    def loop_sim(self,car):
         for t in range(SIM_COUNT):
             screen.fill((0,0,0))
             screen.blit(self.background,(0,0))
 
             car.run(self.coursePix)
 
-            info_str = f"car_num={car_num},time={str(t)},score={car.score:5.2f}"
+            info_str = f"time={str(t)},score={car.score:5.2f}"
             info = mono_font.render(info_str, True, (255,0,0))
             screen.blit(info, (20,20))
 
@@ -289,15 +355,21 @@ class Simulation:
 
     def execute(self):
         self.running = True
-        self.car = list(Car(self.ga.get_gene(i)) for i in range(CAR_NUM))
+        self.cars = list(Car(self.ga.get_gene(i)) for i in range(CAR_NUM))
 
-        self.result = []
+        work = []
+        for n,car in enumerate(self.cars):
+            score = self.loop_sim(car)
+            work.append((score,car.gene))
+        
+        self.ga.make_next_generation(work)
 
-        for n,c in enumerate(self.car):
-            score = self.loop_sim(n,c)
-            # self.result.append((n,score,c.gene))
-            self.result.append((n,score))
-        print(self.result)
+    
+
+
+        
+        
+        
     
 
 
@@ -310,7 +382,7 @@ speed_tbl = np.linspace(-1,1,32)
 
 
 if False:
-# if True:
+    # if True:
     pass
 else:
     pg.init()
