@@ -191,10 +191,9 @@ class Car:
 
     def calc_score(self, vel_L, vel_R):
         if self.state_t[-1] == 1 or self.state_t[-1] == 2:
-            # absを外して、後退してる場合はスコアマイナスになるようにした
-            self.score += (vel_L + vel_R) / 2.0
+            self.score += abs(vel_L + vel_R) / 2.0
         else:
-            self.score += (vel_L + vel_R) / 2.0 * 0.2
+            self.score += abs(vel_L + vel_R) / 2.0 * 0.2
 
     def move(self,vel_L,vel_R):
         vel_L *= -1
@@ -314,7 +313,7 @@ class GA_MANAGER:
     def make_next_generation(self, score_ga):
         work = sorted(score_ga,key=lambda x: x[0],reverse=True)
 
-        self.genes = []
+        self.genes.clear()
         self.genes.append(work[0][1])
         self.genes.append(work[1][1])
 
@@ -411,17 +410,12 @@ class Simulation:
 
 speed_tbl = np.linspace(-1,1,32)
 
-ga = GA_MANAGER()
-score_ga = []
-for x in range(CAR_NUM):
-    score_ga.append((1.0 + x, [random.choice([1,0]) for _ in range(GEN_NUM)]))
-ga.make_next_generation(score_ga)
 
 #if False:
 if True:
-#    sim = Simulation()
-#    for _ in range(100):
-#        sim.execute()
+    sim = Simulation()
+    for _ in range(100):
+        sim.execute()
     pass
 else:
     pg.init()
