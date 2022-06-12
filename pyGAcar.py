@@ -164,7 +164,7 @@ class Car:
         self.state_t = self.state_t + [state]
         if len(self.state_t) > STATE_PATTERN-1:
             self.state_t = self.state_t[1:]
-        print(f"self.state_t={self.state_t}")
+        #print(f"self.state_t={self.state_t}")
 
     def bin2int(self,gene_part):
         sep = int(ACTION_NUM/2)
@@ -177,7 +177,7 @@ class Car:
 
         idx = stidx*ACTION_NUM
         gene_part = self.gene[idx:idx+ACTION_NUM]
-        print(f"idx={idx},gene_part={gene_part}")
+        #print(f"idx={idx},gene_part={gene_part}")
 
         left,right = self.bin2int(gene_part)
         vel_L = speed_tbl[left]
@@ -237,15 +237,21 @@ class Car:
 class GA_MANAGER:
     def __init__(self):
         self.genes = []
-        self.make_first_generation()
-        pass
+
+    def debug_gene_content(self):
+        for n,gene in enumerate(self.genes):
+            print(f"{n},",end="")
+            for i,g in enumerate(gene):
+                if i % 8 == 0:
+                    print("|",end="")
+                print(f"{g}",end="")
+            print("")
 
     def make_first_generation(self):
         for _ in range(CAR_NUM):
             self.genes.append([random.choice([1,0]) for _ in range(GEN_NUM)])
         
-        print("first gen")
-        print(self.genes)
+
     
     def get_gene(self, i):
         return self.genes[i]
@@ -298,21 +304,20 @@ class GA_MANAGER:
         return new_ga
     
     def make_next_generation(self, score_ga):
-        work = sorted(score_ga,key=lambda x: x[1])
+        work = sorted(score_ga,key=lambda x: x[0],reverse=True)
 
         self.genes = []
         self.genes.append(work[0][1])
         self.genes.append(work[1][1])
 
         choices = self.choice_by_roulette(work,CAR_NUM-2)
+        print([c[0] for c in choices])
         ga_list = [g[1] for g in choices]
 
         ga_list = self.mix(ga_list)
         ga_list = self.mutation(ga_list)
-        self.genes.append(ga_list)
+        self.genes += ga_list
 
-        print("next gen")
-        print(self.genes)
 
 
 
@@ -361,8 +366,17 @@ class Simulation:
         for n,car in enumerate(self.cars):
             score = self.loop_sim(car)
             work.append((score,car.gene))
+
+        print("first gen")
+        self.genes = sorted(work,key=lambda x: x[0],reverse=True)
+        for gene in self.genes:
+            print(gene)
+        self.ga.debug_gene_content()
         
         self.ga.make_next_generation(work)
+
+        print("next gen")
+        self.ga.debug_gene_content()
 
     
 
