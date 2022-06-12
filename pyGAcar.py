@@ -36,7 +36,8 @@ FPS = 400
 #FPS = 5
 fpsClock = pg.time.Clock()
 
-GRAPHIC_ENB = False
+#GRAPHIC_ENB = False
+GRAPHIC_ENB = True
 
 # define
 BLACK = 0
@@ -298,7 +299,7 @@ class GA_MANAGER:
             new_ga.append(ga_list[i+1][:nx] + ga_list[i][nx:])
         return new_ga
 
-    def mutation(self, ga_list, probability=0.1):
+    def mutation(self, ga_list, probability=0.3):
         new_ga = []
         for n,ga in enumerate(ga_list):
             if random.random() < probability:
@@ -335,10 +336,10 @@ class Simulation:
     def __init__(self):
         if GRAPHIC_ENB:
             # for display
-            self.background = load_image('course1.jpg')
+            self.background = load_image('course2.jpg')
 
         # as a ndarray for sensing
-        self.coursePix = np.array(Image.open('data/course1.jpg').convert('L'))
+        self.coursePix = np.array(Image.open('data/course2.jpg').convert('L'))
 
         # generate genes
         self.ga = GA_MANAGER()
@@ -408,11 +409,11 @@ class Simulation:
 # start
 # =============================================================================
 
-speed_tbl = np.linspace(-1,1,32)
+speed_tbl = np.linspace(-5,5,32)
 
 
-#if False:
-if True:
+if False:
+#if True:
     sim = Simulation()
     for _ in range(100):
         sim.execute()
