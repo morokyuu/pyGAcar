@@ -27,12 +27,13 @@ from enum import Enum
 WINDOW_W = 640
 WINDOW_H = 480
 
-SCREENRECT = pg.Rect(0,0,640,480)
+SCREENRECT = pg.Rect(0,0,WINDOW_W,WINDOW_H)
 main_dir = os.path.split(os.path.abspath(__file__))[0]
 
 # frame rate
 #FPS = 60
-FPS = 240
+FPS = 400
+#FPS = 5
 fpsClock = pg.time.Clock()
 
 # define
@@ -40,8 +41,8 @@ BLACK = 0
 WHITE = 1
 
 # define 
-#SIM_COUNT=1000
-SIM_COUNT=100
+SIM_COUNT=1000
+#SIM_COUNT=500
 STATE_T_NUM=3 # num of previous data
 STATE_PATTERN = 4
 STATE_NUM=STATE_PATTERN**STATE_T_NUM
@@ -117,10 +118,11 @@ def calc_car_position(x,y,th):
 
 
 class Car:
-    def __init__(self,gene,ini_sx=530,ini_sy=330):
+    #def __init__(self,gene,ini_sx=530,ini_sy=330):
+    def __init__(self,gene,ini_sx=350,ini_sy=95,ini_sq=1.57):
         self.sx = ini_sx
         self.sy = ini_sy
-        self.sq = 0
+        self.sq = ini_sq 
         self.state_t = []
         self.gene = gene
         self.score = 0
@@ -210,13 +212,7 @@ class Car:
         if self.sy >= WINDOW_H:
             self.sy -= WINDOW_H
 
-    def run(self,course):
-        self.get_sensor(course)
-        vel_L,vel_R = self.set_action()
-        self.calc_score(vel_L,vel_R)
-
-        self.move(vel_L,vel_R)
-
+    def draw(self):
         pg.draw.polygon(screen,(100,100,100), self.body)
         pg.draw.polygon(screen,(80,100,100), self.tireR)
         pg.draw.polygon(screen,(80,100,100), self.tireL)
@@ -230,6 +226,14 @@ class Car:
         pg.draw.circle(screen, sensPat[self.state_t[-1]][0], self.sensL,4)
         pg.draw.circle(screen, sensPat[self.state_t[-1]][1], self.sensR,4)
 
+
+    def run(self,course):
+        self.get_sensor(course)
+        vel_L,vel_R = self.set_action()
+        self.calc_score(vel_L,vel_R)
+        self.move(vel_L,vel_R)
+
+        self.draw()
         #print(f"{self.resL}, {self.resR}, {state}")
 
 
@@ -367,16 +371,14 @@ class Simulation:
             score = self.loop_sim(car)
             work.append((score,car.gene))
 
-        print("first gen")
-        self.genes = sorted(work,key=lambda x: x[0],reverse=True)
-        for gene in self.genes:
-            print(gene)
-        self.ga.debug_gene_content()
-        
+        #print("first gen")
+        #self.genes = sorted(work,key=lambda x: x[0],reverse=True)
+        #for gene in self.genes:
+        #    print(gene)
+        #self.ga.debug_gene_content()
         self.ga.make_next_generation(work)
-
-        print("next gen")
-        self.ga.debug_gene_content()
+        #print("next gen")
+        #self.ga.debug_gene_content()
 
     
 
@@ -406,7 +408,9 @@ else:
     clock = pg.time.Clock()
     mono_font = pg.font.Font("/usr/share/fonts/truetype/ubuntu-font-family/UbuntuMono-R.ttf", 20)
 
+    
     sim = Simulation()
-    sim.execute()
+    for _ in range(100):
+        sim.execute()
 
     pg.quit()
