@@ -189,9 +189,9 @@ class Car:
 
     def calc_score(self, vel_L, vel_R):
         if self.state_t[-1] == 1 or self.state_t[-1] == 2:
-            self.score += abs(vel_L + vel_R) / 2.0
+            self.score += (vel_L + vel_R) / 2.0
         else:
-            self.score += abs(vel_L + vel_R) / 2.0 * 0.2
+            self.score += (vel_L + vel_R) / 2.0 * 0.2
 
     def move(self,vel_L,vel_R):
         vel_L *= -1
