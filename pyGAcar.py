@@ -189,6 +189,7 @@ class Car:
 
     def calc_score(self, vel_L, vel_R):
         if self.state_t[-1] == 1 or self.state_t[-1] == 2:
+            # absを外して、後退してる場合はスコアマイナスになるようにした
             self.score += (vel_L + vel_R) / 2.0
         else:
             self.score += (vel_L + vel_R) / 2.0 * 0.2
