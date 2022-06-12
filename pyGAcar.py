@@ -36,6 +36,8 @@ FPS = 400
 #FPS = 5
 fpsClock = pg.time.Clock()
 
+GRAPHIC_ENB = False
+
 # define
 BLACK = 0
 WHITE = 1
@@ -234,7 +236,8 @@ class Car:
         self.calc_score(vel_L,vel_R)
         self.move(vel_L,vel_R)
 
-        self.draw()
+        if GRAPHIC_ENB:
+            self.draw()
         #print(f"{self.resL}, {self.resR}, {state}")
 
 
@@ -262,13 +265,13 @@ class GA_MANAGER:
         return self.genes[i]
 
     def choice_by_roulette(self, score_ga, choice_num):
+
         #得点を降順にソートしたもの
         work = sorted(score_ga,key=lambda x: x[1])
         score_sum = sum([w[0] for w in work])
     
         #得点が0から1になるように正規化
         sortScore = [w[0]/score_sum for w in work]
-        CAR_NUM = len(sortScore)
         # print(sortScore)
     
         #得点を区間に分割 各区間をtuple(開始,終了)にする
@@ -316,6 +319,8 @@ class GA_MANAGER:
         self.genes.append(work[1][1])
 
         choices = self.choice_by_roulette(work,CAR_NUM-2)
+        print("choices len:" + str(len(choices)))
+
         print([c[0] for c in choices])
         ga_list = [g[1] for g in choices]
 
@@ -329,8 +334,10 @@ class GA_MANAGER:
 
 class Simulation:
     def __init__(self):
-        # for display
-        self.background = load_image('course1.jpg')
+        if GRAPHIC_ENB:
+            # for display
+            self.background = load_image('course1.jpg')
+
         # as a ndarray for sensing
         self.coursePix = np.array(Image.open('data/course1.jpg').convert('L'))
 
@@ -341,36 +348,43 @@ class Simulation:
     
     def loop_sim(self,car):
         for t in range(SIM_COUNT):
-            screen.fill((0,0,0))
-            screen.blit(self.background,(0,0))
+            if GRAPHIC_ENB:
+                screen.fill((0,0,0))
+                screen.blit(self.background,(0,0))
 
             car.run(self.coursePix)
 
-            info_str = f"time={str(t)},score={car.score:5.2f}"
-            info = mono_font.render(info_str, True, (255,0,0))
-            screen.blit(info, (20,20))
+            if GRAPHIC_ENB:
+                info_str = f"time={str(t)},score={car.score:5.2f}"
+                info = mono_font.render(info_str, True, (255,0,0))
+                screen.blit(info, (20,20))
 
-            for event in pg.event.get():
-                if event.type == pg.QUIT:
-                    self.running = False
-                if event.type == pg.KEYDOWN:
-                    if event.key == pg.K_SPACE:
-                        btn_space = True
-                    elif event.key == pg.K_ESCAPE:
+                for event in pg.event.get():
+                    if event.type == pg.QUIT:
                         self.running = False
+                    if event.type == pg.KEYDOWN:
+                        if event.key == pg.K_SPACE:
+                            btn_space = True
+                        elif event.key == pg.K_ESCAPE:
+                            self.running = False
+                pg.display.flip()
+                fpsClock.tick(FPS)
 
-            pg.display.flip()
-            fpsClock.tick(FPS)
         return car.score
 
     def execute(self):
         self.running = True
         self.cars = list(Car(self.ga.get_gene(i)) for i in range(CAR_NUM))
+        print("cars :" + str(len(self.cars)))
 
         work = []
         for n,car in enumerate(self.cars):
             score = self.loop_sim(car)
             work.append((score,car.gene))
+        
+        #for w in work:
+        #    print(w[0])
+
 
         #print("first gen")
         #self.genes = sorted(work,key=lambda x: x[0],reverse=True)
@@ -397,9 +411,17 @@ class Simulation:
 
 speed_tbl = np.linspace(-1,1,32)
 
+ga = GA_MANAGER()
+score_ga = []
+for x in range(CAR_NUM):
+    score_ga.append((1.0 + x, [random.choice([1,0]) for _ in range(GEN_NUM)]))
+ga.make_next_generation(score_ga)
 
-if False:
-    # if True:
+#if False:
+if True:
+#    sim = Simulation()
+#    for _ in range(100):
+#        sim.execute()
     pass
 else:
     pg.init()
