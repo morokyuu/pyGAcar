@@ -46,7 +46,7 @@ def drawCircle(ax, xy, _r=1.4, _fc='b'):
 
 
 class Car:
-    def __init__(self):
+    def __init__(self,ini_x=WINDOW_W/2.0,ini_y=WINDOW_H/2.0,ini_q=0.0):
         #robot size
         self.BODY_W = 40
         self.BODY_L = 70
@@ -60,20 +60,28 @@ class Car:
             [0, self.BODY_L,1],
             ]).T
 
+        self.tire = np.array([
+            [0,0,1],
+            [self.THICK, 0,1],
+            [self.THICK, self.DIAMETER,1],
+            [0, self.DIAMETER,1],
+            ]).T
+
+        self.sens = np.array([
+            [self.BODY_W - 8, 65, 1]
+            ]).T
+
+        self.sx = ini_x
+        self.sy = ini_y
+        self.sq = ini_q 
+
         self.body = np.dot(trans(-self.BODY_W/2.0, -self.DIAMETER/2.0),self.body)
-
-        self.ini_x = 400
-        self.ini_y = 300
-        self.ini_q = np.pi
-
-        self.sx = self.ini_x
-        self.sy = self.ini_y
-        self.sq = self.ini_q 
-
+        self.tireR = np.dot(trans(self.BODY_W/2.0, -self.DIAMETER/2.0),self.tire)
+        self.tireL = np.dot(mirrorX(),self.tireR)
+        self.sensR = np.dot(trans(-self.BODY_W/2.0, -15),self.sens)
+        self.sensL = np.dot(mirrorX(),self.sensR)
 
     def calc_steer(self,vel_L,vel_R):
-        vel_L *= 1
-        vel_R *= 1
         t_sq = (vel_L - vel_R) / self.BODY_W
         t_vel = (vel_L + vel_R) / 2.0
 
@@ -97,10 +105,10 @@ class Car:
 
 
 def main():
-    car = Car()
-
+    car = Car(400,300,np.pi)
 
     for i in range(67):  #(3.14/2)/0.025 = 68
+    #for i in range(1):  #(3.14/2)/0.025 = 68
         car.calc_steer(1,2)
 
         print(f"q={car.sq:.4g}, x={car.sx:.4g}, y={car.sy:.4g}")
@@ -112,7 +120,15 @@ def main():
             dv = trans(car.sx,car.sy) @ rot(car.sq)
             print(dv)
             c_body  = dv @ car.body
+            c_tireR = dv @ car.tireR
+            c_tireL = dv @ car.tireL
+            c_sensR = dv @ car.sensR
+            c_sensL = dv @ car.sensL
             drawCircle(ax, c_body , _fc='g')
+            drawCircle(ax, c_tireR, _fc='g')
+            drawCircle(ax, c_tireL, _fc='g')
+            drawCircle(ax, c_sensR, _fc='g')
+            drawCircle(ax, c_sensL, _fc='g')
 
             ax.set_xlabel("X [mm]")
             ax.set_ylabel("Y [mm]")
