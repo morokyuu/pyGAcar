@@ -7,6 +7,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
+from PIL import Image, ImageDraw
+
 WINDOW_W = 640
 WINDOW_H = 480
 
@@ -107,15 +109,24 @@ class Car:
             pose.y -= WINDOW_H
         #print(f"pose.q={pose.q:.2g}, pose.x={pose.x:.2g}, pose.y={pose.y:.2g}")
 
-    def get_sens(self,pose):
-        c_sensR = pose.get_tf() @ self.sensR
-        c_sensL = pose.get_tf() @ self.sensL
-        print(c_sensR)
+    def get_sens(self,pose,pix):
+        sr = pose.get_tf() @ self.sensR
+        sl = pose.get_tf() @ self.sensL
+
+        sr = list(int(v) for v in sr)
+        sl = list(int(v) for v in sl)
+
+        cr = pix[sr[1],sr[0]]
+        cl = pix[sl[1],sl[0]]
+        print(f"sensL: pix[{sl[1]},{sl[0]}]={cl} sensR: pix[{sr[1]},{sr[0]}]={cr}")
         #print(f"sens:{pose.x:.4g},{pose.y:.4g}")
         #pass
 
 
 def main():
+
+    coursePix = np.array(Image.open('data/debug_course.jpg').convert('L')) 
+    
     car = Car()
 
     pose = Pose(400,300,np.pi)
@@ -124,10 +135,10 @@ def main():
     #for i in range(1):  #(3.14/2)/0.025 = 68
         car.calc_steer(pose, 1,2)
         #print(f"q={pose.q:.4g}, x={pose.x:.4g}, y={pose.y:.4g}")
-        car.get_sens(pose)
+        car.get_sens(pose,coursePix)
 
-        if False:
-        #if True:
+        #if False:
+        if True:
             ax = plt.subplot(1, 1, 1)
 
             dv = pose.get_tf()
