@@ -106,11 +106,13 @@ class Car:
         if pose.y >= WINDOW_H:
             pose.y -= WINDOW_H
         #print(f"pose.q={pose.q:.2g}, pose.x={pose.x:.2g}, pose.y={pose.y:.2g}")
-        #return pose
-        #return Pose(pose.x,pose.y,pose.q)
 
-    def get_sens(self,sq,sx,sy):
-        pass
+    def get_sens(self,pose):
+        c_sensR = pose.get_tf() @ self.sensR
+        c_sensL = pose.get_tf() @ self.sensL
+        print(c_sensR)
+        #print(f"sens:{pose.x:.4g},{pose.y:.4g}")
+        #pass
 
 
 def main():
@@ -120,12 +122,12 @@ def main():
 
     for i in range(67):  #(3.14/2)/0.025 = 68
     #for i in range(1):  #(3.14/2)/0.025 = 68
-        #pose = car.calc_steer(pose, 1,2)
         car.calc_steer(pose, 1,2)
-        print(f"q={pose.q:.4g}, x={pose.x:.4g}, y={pose.y:.4g}")
+        #print(f"q={pose.q:.4g}, x={pose.x:.4g}, y={pose.y:.4g}")
+        car.get_sens(pose)
 
-        #if False:
-        if True:
+        if False:
+        #if True:
             ax = plt.subplot(1, 1, 1)
 
             dv = pose.get_tf()
