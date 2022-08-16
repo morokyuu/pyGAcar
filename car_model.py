@@ -45,6 +45,16 @@ def drawCircle(ax, xy, _r=1.4, _fc='b'):
         ax.add_patch(patches.Circle(xy[:,i], radius=_r, fc=_fc))
 
 
+class Pose:
+    def __init__(self,x,y,q):
+        self.x = x
+        self.y = y
+        self.q = q
+
+    def get_tf(self):
+        return trans(self.x,self.y) @ rot(self.q)
+
+
 class Car:
     def __init__(self):
         #robot size
@@ -77,46 +87,48 @@ class Car:
         self.sensR = np.dot(trans(-self.BODY_W/2.0, -15),self.sens)
         self.sensL = np.dot(mirrorX(),self.sensR)
 
-    def calc_steer(self,sq,sx,sy,vel_L,vel_R):
+    def calc_steer(self,pose,vel_L,vel_R):
         t_sq = (vel_L - vel_R) / self.BODY_W
         t_vel = (vel_L + vel_R) / 2.0
         #R = self.BODY_W/2.0 * (vel_R - vel_L) / (vel_R - vel_L+0.001)
         #print(f"t_sq={t_sq:.2g}, t_vel={t_vel:.2g}, R={R:.2g}")
         
-        sq += t_sq
-        sx -= t_vel * np.sin(sq)
-        sy += t_vel * np.cos(sq)
+        pose.x -= t_vel * np.sin(pose.q)
+        pose.y += t_vel * np.cos(pose.q)
+        pose.q += t_sq
 
-        if sx < 0:
-            sx += WINDOW_W
-        if sx >= WINDOW_W:
-            sx -= WINDOW_W
-        if sy < 0:
-            sy += WINDOW_H
-        if sy >= WINDOW_H:
-            sy -= WINDOW_H
-        #print(f"sq={sq:.2g}, sx={sx:.2g}, sy={sy:.2g}")
-        return sq,sx,sy
+        if pose.x < 0:
+            pose.x += WINDOW_W
+        if pose.x >= WINDOW_W:
+            pose.x -= WINDOW_W
+        if pose.y < 0:
+            pose.y += WINDOW_H
+        if pose.y >= WINDOW_H:
+            pose.y -= WINDOW_H
+        #print(f"pose.q={pose.q:.2g}, pose.x={pose.x:.2g}, pose.y={pose.y:.2g}")
+        #return pose
+        #return Pose(pose.x,pose.y,pose.q)
 
+    def get_sens(self,sq,sx,sy):
+        pass
 
 
 def main():
     car = Car()
 
-    sq = np.pi
-    sx = 400
-    sy = 300
+    pose = Pose(400,300,np.pi)
 
     for i in range(67):  #(3.14/2)/0.025 = 68
     #for i in range(1):  #(3.14/2)/0.025 = 68
-        sq,sx,sy = car.calc_steer(sq,sx,sy, 1,2)
-
-        print(f"q={sq:.4g}, x={sx:.4g}, y={sy:.4g}")
+        #pose = car.calc_steer(pose, 1,2)
+        car.calc_steer(pose, 1,2)
+        print(f"q={pose.q:.4g}, x={pose.x:.4g}, y={pose.y:.4g}")
 
         #if False:
         if True:
             ax = plt.subplot(1, 1, 1)
-            dv = trans(sx,sy) @ rot(sq)
+
+            dv = pose.get_tf()
             print(dv)
             c_body  = dv @ car.body
             c_tireR = dv @ car.tireR
