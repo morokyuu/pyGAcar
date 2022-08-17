@@ -25,9 +25,9 @@ class SimLoopTest(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_gene2index(self):
+    def test_gene_to_speed_index(self):
         gene = [0,1,1,0,0]
-        idx = self.sim._gene2index(gene)
+        idx = self.sim._gene_to_speed_index(gene)
         self.assertEqual(12,idx)
 
     def _print_separate(self,a,length):
@@ -35,28 +35,38 @@ class SimLoopTest(unittest.TestCase):
         for s in spl:
             print(s)
 
+    def test_state_to_gene_index(self):
+        state = [3,3,3]
+        idx = self.sim._state_to_gene_index(state)
+        print(f"state,idx={state},{idx}")
+
+        self.assertEqual(idx,630)
+        pass
+
     def test_gene2part(self):
         state = [3,3,3]
         targ_gene = [1,1,1,0,0] + [1,0,0,0,1]
 
-        stidx = sum([s * sl.STATE_PATTERN**n for n,s in enumerate(state[::-1])])
-        idx = stidx*sl.ACTION_NUM
-        print(f"state,stidx,idx={state},{stidx},{idx}")
-
+        idx = self.sim._state_to_gene_index(state)
         self.gene = self.gene[:idx] + targ_gene + self.gene[idx+sl.ACTION_NUM:]  
         self._print_separate(self.gene,sl.ACTION_NUM)
 
         print(idx)
         val = self.sim._gene2part(self.gene,state)
 
-        self.assertEqual(idx,630)
         self.assertEqual(val,targ_gene)
 
-#    def test_calc_wheel_speed(self):
-#        print("calc_wheel_speed 1===")
-#        state = [0,0,0,1]
-#        vl,vr = self.sim._calc_wheel_speed(state,self.gene)
-#        self.assertEqual(0,0)
+    def test_calc_wheel_speed(self):
+        state = [0,0,1]
+        targ_gene = [1,1,1,1,1] + [0,0,0,0,0]
+
+        idx = self.sim._state_to_gene_index(state)
+        self.gene = self.gene[:idx] + targ_gene + self.gene[idx+sl.ACTION_NUM:]  
+
+        vl,vr = self.sim._calc_wheel_speed(state,self.gene)
+        print(f"vl,vr={vl},{vr}")
+        self.assertEqual(vl,self.sim.speed_tbl[2**(sl.ACTION_NUM//2)-1])
+        self.assertEqual(vr,self.sim.speed_tbl[0])
 
 #    def test_sens_(self):
 #        self.pose = cm.Pose(400,300,np.pi)

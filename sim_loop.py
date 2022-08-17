@@ -38,23 +38,25 @@ class SimLoop:
         return score
 
 
-    def _gene2index(self,gene_part):
+    def _gene_to_speed_index(self,gene_part):
         return sum([s * 2**n for n,s in enumerate(gene_part[::-1])])
 
-    def _gene2part(self,gene,state):
+    def _state_to_gene_index(self,state):
         stidx = sum([s * STATE_PATTERN**n for n,s in enumerate(state[::-1])])
         idx = stidx*ACTION_NUM
-        gene_part = gene[idx:idx+ACTION_NUM]
-        print(f"idx={idx},gene_part={gene_part}")
-        return gene_part
+        return idx
 
+    def _gene2part(self,gene,state):
+        idx = self._state_to_gene_index(state)
+        gene_part = gene[idx:idx+ACTION_NUM]
+        return gene_part
 
     def _calc_wheel_speed(self,state,gene):
         gene_part = self._gene2part(gene,state)
 
         sep = ACTION_NUM//2
-        left  = self._gene2index(gene_part[:sep])
-        right = self._gene2index(gene_part[sep:ACTION_NUM])
+        left  = self._gene_to_speed_index(gene_part[:sep])
+        right = self._gene_to_speed_index(gene_part[sep:ACTION_NUM])
         print(f"left,right={left},{right}")
 
         vel_L = self.speed_tbl[left]
