@@ -38,23 +38,8 @@ class SimLoopTest(unittest.TestCase):
     def test_state_to_gene_index(self):
         state = [3,3,3]
         idx = self.sim._state_to_gene_index(state)
-        print(f"state,idx={state},{idx}")
-
+        print(f"state={state},idx={idx}")
         self.assertEqual(idx,630)
-        pass
-
-#    def test_gene2part(self):
-#        state = [3,3,3]
-#        targ_gene = [1,1,1,0,0] + [1,0,0,0,1]
-#
-#        idx = self.sim._state_to_gene_index(state)
-#        self.gene = self.gene[:idx] + targ_gene + self.gene[idx+sl.ACTION_NUM:]  
-#        self._print_separate(self.gene,sl.ACTION_NUM)
-#
-#        print(idx)
-#        val = self.sim._gene2part(self.gene,state)
-#
-#        self.assertEqual(val,targ_gene)
 
     def test_calc_wheel_speed(self):
         state = [0,0,1]
@@ -68,11 +53,6 @@ class SimLoopTest(unittest.TestCase):
         self.assertEqual(vl,self.sim.speed_tbl[2**(sl.ACTION_NUM//2)-1])
         self.assertEqual(vr,self.sim.speed_tbl[0])
 
-#    def test_sens_(self):
-#        self.pose = cm.Pose(400,300,np.pi)
-#        sens = self.car.get_sens(self.pose,self.coursePix)
-#        print(f"sens(L,R) = {sens}")
-#        self.assertEqual((1,0),sens)
 
 if __name__ == "__main__":
     unittest.main()

@@ -46,20 +46,13 @@ class SimLoop:
         idx = stidx*ACTION_NUM
         return idx
 
-#    def _gene2part(self,gene,state):
-#        idx = self._state_to_gene_index(state)
-#        gene_part = gene[idx:idx+ACTION_NUM]
-#        return gene_part
-
     def _calc_wheel_speed(self,state,gene):
-#        gene_part = self._gene2part(gene,state)
         idx = self._state_to_gene_index(state)
         gene_part = gene[idx:idx+ACTION_NUM]
 
         sep = ACTION_NUM//2
         left  = self._gene_to_speed_index(gene_part[:sep])
         right = self._gene_to_speed_index(gene_part[sep:ACTION_NUM])
-        print(f"left,right={left},{right}")
 
         vel_L = self.speed_tbl[left]
         vel_R = self.speed_tbl[right]
@@ -72,14 +65,14 @@ class SimLoop:
 
         if len(self.state) > STATE_T_NUM:
             self.state = self.state[1:]
-        print(self.state)
+        #print(self.state)
 
         # car control based on sensor state
         vl,vr = self._calc_wheel_speed(self.state,self.gene)
 
         # calc GA score
         self.score += self._calc_score(self.state,vl,vr)
-        print(self.score)
+        #print(self.score)
 
         # car movement
         self.car.calc_steer(self.pose,vl,vr)
@@ -87,7 +80,7 @@ class SimLoop:
 
 def main():
     coursePix = np.array(Image.open('data/debug_course.jpg').convert('L')) 
-    print(f"GEN_NUM={GEN_NUM}")
+    #print(f"GEN_NUM={GEN_NUM}")
     gene = list(random.choice([1,0]) for _ in range(GEN_NUM))
     sim = SimLoop(cm.Pose(400,300,np.pi),coursePix,gene)
     for _ in range(70):
