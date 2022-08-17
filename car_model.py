@@ -80,13 +80,13 @@ class Car:
             ]).T
 
         self.sens = np.array([
-            [self.BODY_W - 8, 65, 1]
+            [-self.BODY_W/2.0 + 8, 65, 1]
             ]).T
 
         self.body = np.dot(trans(-self.BODY_W/2.0, -self.DIAMETER/2.0),self.body)
         self.tireR = np.dot(trans(self.BODY_W/2.0, -self.DIAMETER/2.0),self.tire)
         self.tireL = np.dot(mirrorX(),self.tireR)
-        self.sensR = np.dot(trans(-self.BODY_W/2.0, -15),self.sens)
+        self.sensR = np.dot(trans(0, -15),self.sens)
         self.sensL = np.dot(mirrorX(),self.sensR)
 
     def calc_steer(self,pose,vel_L,vel_R):
@@ -109,6 +109,12 @@ class Car:
             pose.y -= WINDOW_H
         #print(f"pose.q={pose.q:.2g}, pose.x={pose.x:.2g}, pose.y={pose.y:.2g}")
 
+    def threshold(self,sens_value):
+        if sens_value < 128:
+            return 0
+        else:
+            return 1
+
     def get_sens(self,pose,pix):
         sr = pose.get_tf() @ self.sensR
         sl = pose.get_tf() @ self.sensL
@@ -119,8 +125,10 @@ class Car:
         cr = pix[sr[1],sr[0]]
         cl = pix[sl[1],sl[0]]
         print(f"sensL: pix[{sl[1]},{sl[0]}]={cl} sensR: pix[{sr[1]},{sr[0]}]={cr}")
-        #print(f"sens:{pose.x:.4g},{pose.y:.4g}")
-        #pass
+
+        cr = self.threshold(cr)
+        cl = self.threshold(cl)
+        return cl,cr
 
 
 def main():
@@ -135,7 +143,7 @@ def main():
     #for i in range(1):  #(3.14/2)/0.025 = 68
         car.calc_steer(pose, 1,2)
         #print(f"q={pose.q:.4g}, x={pose.x:.4g}, y={pose.y:.4g}")
-        car.get_sens(pose,coursePix)
+        cl,cr = car.get_sens(pose,coursePix)
 
         #if False:
         if True:
@@ -151,8 +159,8 @@ def main():
             drawCircle(ax, c_body , _fc='g')
             drawCircle(ax, c_tireR, _fc='g')
             drawCircle(ax, c_tireL, _fc='g')
-            drawCircle(ax, c_sensR, _fc='g')
-            drawCircle(ax, c_sensL, _fc='g')
+            drawCircle(ax, c_sensR, _fc='r', _r=2)
+            drawCircle(ax, c_sensL, _fc='r', _r=2)
 
             ax.set_xlabel("X [mm]")
             ax.set_ylabel("Y [mm]")
