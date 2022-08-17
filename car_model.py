@@ -124,7 +124,7 @@ class Car:
 
         cr = pix[sr[1],sr[0]]
         cl = pix[sl[1],sl[0]]
-        print(f"sensL: pix[{sl[1]},{sl[0]}]={cl} sensR: pix[{sr[1]},{sr[0]}]={cr}")
+        #print(f"sensL: pix[{sl[1]},{sl[0]}]={cl} sensR: pix[{sr[1]},{sr[0]}]={cr}")
 
         cr = self.threshold(cr)
         cl = self.threshold(cl)
