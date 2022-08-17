@@ -43,18 +43,18 @@ class SimLoopTest(unittest.TestCase):
         self.assertEqual(idx,630)
         pass
 
-    def test_gene2part(self):
-        state = [3,3,3]
-        targ_gene = [1,1,1,0,0] + [1,0,0,0,1]
-
-        idx = self.sim._state_to_gene_index(state)
-        self.gene = self.gene[:idx] + targ_gene + self.gene[idx+sl.ACTION_NUM:]  
-        self._print_separate(self.gene,sl.ACTION_NUM)
-
-        print(idx)
-        val = self.sim._gene2part(self.gene,state)
-
-        self.assertEqual(val,targ_gene)
+#    def test_gene2part(self):
+#        state = [3,3,3]
+#        targ_gene = [1,1,1,0,0] + [1,0,0,0,1]
+#
+#        idx = self.sim._state_to_gene_index(state)
+#        self.gene = self.gene[:idx] + targ_gene + self.gene[idx+sl.ACTION_NUM:]  
+#        self._print_separate(self.gene,sl.ACTION_NUM)
+#
+#        print(idx)
+#        val = self.sim._gene2part(self.gene,state)
+#
+#        self.assertEqual(val,targ_gene)
 
     def test_calc_wheel_speed(self):
         state = [0,0,1]

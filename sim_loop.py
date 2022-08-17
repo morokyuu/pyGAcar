@@ -46,13 +46,15 @@ class SimLoop:
         idx = stidx*ACTION_NUM
         return idx
 
-    def _gene2part(self,gene,state):
-        idx = self._state_to_gene_index(state)
-        gene_part = gene[idx:idx+ACTION_NUM]
-        return gene_part
+#    def _gene2part(self,gene,state):
+#        idx = self._state_to_gene_index(state)
+#        gene_part = gene[idx:idx+ACTION_NUM]
+#        return gene_part
 
     def _calc_wheel_speed(self,state,gene):
-        gene_part = self._gene2part(gene,state)
+#        gene_part = self._gene2part(gene,state)
+        idx = self._state_to_gene_index(state)
+        gene_part = gene[idx:idx+ACTION_NUM]
 
         sep = ACTION_NUM//2
         left  = self._gene_to_speed_index(gene_part[:sep])
