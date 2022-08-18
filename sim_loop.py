@@ -10,6 +10,7 @@ from PIL import Image, ImageDraw
 import car_model as cm
 import random
 
+LOOP_NUM = 100
 STATE_T_NUM=3 # num of previous data
 STATE_PATTERN = 4
 STATE_NUM=STATE_PATTERN**STATE_T_NUM
@@ -21,7 +22,6 @@ class SimLoop:
         self.pose = pose
         self.course = course
         self.car = cm.Car()
-        self.score = 0
         self.state = []
         self.gene = gene
         self.speed_tbl = np.linspace(-5,5,2**5)
@@ -59,25 +59,28 @@ class SimLoop:
         return vel_L, vel_R
 
     def exec(self):
-        # get sensor state 
-        sens = self.car.get_sens(self.pose,self.course)
-        self.state = self.state + [self._sens2state(sens)]
+        score = 0
+        for _ in range(LOOP_NUM):
+            # get sensor state 
+            sens = self.car.get_sens(self.pose,self.course)
+            self.state = self.state + [self._sens2state(sens)]
 
-        if len(self.state) > STATE_T_NUM:
-            self.state = self.state[1:]
-        #print(self.state)
+            if len(self.state) > STATE_T_NUM:
+                self.state = self.state[1:]
+            #print(self.state)
 
-        # car control based on sensor state
-        vl,vr = self._calc_wheel_speed(self.state,self.gene)
-        #print(f"vl,vr={vl:.4g},{vr:.4g}")
+            # car control based on sensor state
+            vl,vr = self._calc_wheel_speed(self.state,self.gene)
+            #print(f"vl,vr={vl:.4g},{vr:.4g}")
 
-        # calc GA score
-        self.score += self._calc_score(self.state,vl,vr)
-        #print(self.score)
+            # calc GA score
+            score += self._calc_score(self.state,vl,vr)
+            #print(self.score)
 
-        # car movement
-        self.car.calc_steer(self.pose,vl,vr)
-        print(f"{self.pose.x:.5g},{self.pose.y:.5g},{self.pose.q:.5g}")
+            # car movement
+            self.car.calc_steer(self.pose,vl,vr)
+            print(f"{self.pose.x:.5g},{self.pose.y:.5g},{self.pose.q:.5g}")
+        return score
 
 
 def main():
@@ -85,8 +88,8 @@ def main():
     #print(f"GEN_NUM={GEN_NUM}")
     gene = list(random.choice([1,0]) for _ in range(GEN_NUM))
     sim = SimLoop(cm.Pose(400,300,np.pi),coursePix,gene)
-    for _ in range(100):
-        sim.exec()
+    score = sim.exec()
+    print(score)
 
 if __name__ == "__main__":
     main()
