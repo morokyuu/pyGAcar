@@ -116,15 +116,18 @@ class Car:
             return 1
 
     def get_sens(self,pose,pix):
+        def clamp(val,maxval):
+            return int(max(min(maxval,val),0))
+
         sr = pose.get_tf() @ self.sensR
         sl = pose.get_tf() @ self.sensL
 
-        sr = list(int(v) for v in sr)
-        sl = list(int(v) for v in sl)
+        srx,sry,_ = list(int(v) for v in sr)
+        slx,sly,_ = list(int(v) for v in sl)
 
-        cr = pix[sr[1],sr[0]]
-        cl = pix[sl[1],sl[0]]
-        #print(f"sensL: pix[{sl[1]},{sl[0]}]={cl} sensR: pix[{sr[1]},{sr[0]}]={cr}")
+        cr = pix[clamp(sry,WINDOW_H-1),clamp(srx,WINDOW_W-1)]
+        cl = pix[clamp(sly,WINDOW_H-1),clamp(slx,WINDOW_W-1)]
+        #print(f"sensL: pix[{slx},{sly}]={cl} sensR: pix[{srx},{sry}]={cr}")
 
         cr = self.threshold(cr)
         cl = self.threshold(cl)

@@ -50,6 +50,13 @@ class CarTest(unittest.TestCase):
         self.assertEqual((0,0),sens)
         #self.plot_car()
 
+    def test_sens_overarea(self):
+        self.pose = cm.Pose(620,300,-np.pi/2.0)
+        sens = self.car.get_sens(self.pose,self.coursePix)
+        print(f"sens(L,R) = {sens}")
+        self.assertEqual((0,0),sens)
+        #self.plot_car()
+
     def plot_car(self):
         ax = plt.subplot(1, 1, 1)
         dv = self.pose.get_tf()

@@ -69,6 +69,7 @@ class SimLoop:
 
         # car control based on sensor state
         vl,vr = self._calc_wheel_speed(self.state,self.gene)
+        #print(f"vl,vr={vl:.4g},{vr:.4g}")
 
         # calc GA score
         self.score += self._calc_score(self.state,vl,vr)
@@ -76,6 +77,7 @@ class SimLoop:
 
         # car movement
         self.car.calc_steer(self.pose,vl,vr)
+        print(f"{self.pose.x:.5g},{self.pose.y:.5g},{self.pose.q:.5g}")
 
 
 def main():
@@ -83,7 +85,7 @@ def main():
     #print(f"GEN_NUM={GEN_NUM}")
     gene = list(random.choice([1,0]) for _ in range(GEN_NUM))
     sim = SimLoop(cm.Pose(400,300,np.pi),coursePix,gene)
-    for _ in range(70):
+    for _ in range(100):
         sim.exec()
 
 if __name__ == "__main__":
