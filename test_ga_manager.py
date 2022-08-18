@@ -35,15 +35,26 @@ class GAManagerTest(unittest.TestCase):
         for i in range(gagm.CAR_NUM):
             g = list(int(b) for b in bin(2**(sl.ACTION_NUM//2)+i)[3:]) 
             genes += [(score(),g)]
-        #print(genes)
 
+        genes = sorted(genes, key=lambda x: x[0], reverse=True)
         for gi in genes:
             print(f"{gi[0]:5.2f},{gi[1]}")
-            #print(f"{gi[0]:.4g},{gi[1]:.4g}")
-        
-        
 
-        self.gm.choice_by_roulette(genes,2)
+        ga_1st = genes[0][1]
+        ga_2nd = genes[1][1]
+        print(f"{genes[0][1]}")
+        print(f"{genes[1][1]}")
+
+        count = 0
+        for _ in range(100):
+            choices = self.gm.choice_by_roulette(genes,2)
+            #print(choices)
+            if ga_1st == choices[0][1]:
+                count += 1
+            if ga_2nd == choices[1][1]:
+                count += 1
+
+        print(f"count={count}")
         pass
 
 
