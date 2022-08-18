@@ -59,7 +59,9 @@ class SimLoop:
         return vel_L, vel_R
 
     def exec(self):
+        dump = ""
         score = 0
+
         for _ in range(LOOP_NUM):
             # get sensor state 
             sens = self.car.get_sens(self.pose,self.course)
@@ -80,7 +82,8 @@ class SimLoop:
             # car movement
             self.car.calc_steer(self.pose,vl,vr)
             #print(f"{self.pose.x:.5g},{self.pose.y:.5g},{self.pose.q:.5g}")
-        return score
+            dump += f"{self.pose.x:10.3f},{self.pose.y:10.3f},{self.pose.q:10.5f},{self.state[-1]:3d}\n"
+        return score,dump
 
 
 def main():
@@ -88,7 +91,7 @@ def main():
     #print(f"GEN_NUM={GEN_NUM}")
     gene = list(random.choice([1,0]) for _ in range(GEN_NUM))
     sim = SimLoop(cm.Pose(400,300,np.pi),coursePix,gene)
-    score = sim.exec()
+    score,dump = sim.exec()
     print(score)
 
 if __name__ == "__main__":

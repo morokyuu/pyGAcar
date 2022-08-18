@@ -95,9 +95,9 @@ class GA_manager:
         self.genes.append(work[1][1])
 
         choices = self.choice_by_roulette(work,CAR_NUM-2)
-        print("choices len:" + str(len(choices)))
+        #print("choices len:" + str(len(choices)))
 
-        print([c[0] for c in choices])
+        #print([c[0] for c in choices])
         ga_list = [g[1] for g in choices]
 
         ga_list = self.mix(ga_list)
