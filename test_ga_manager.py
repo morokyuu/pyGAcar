@@ -27,14 +27,14 @@ class GAManagerTest(unittest.TestCase):
         self.assertEqual(len(self.gm.genes),gagm.CAR_NUM)
         self.assertEqual(len(self.gm.genes[0]),sl.GEN_NUM)
 
-    def test_choice_by_roulette(self):
-        def score():
-            return random.random()*100
+    def _score(self):
+        return random.random()*100
 
+    def test_choice_by_roulette(self):
         genes = []
         for i in range(gagm.CAR_NUM):
             g = list(int(b) for b in bin(2**(sl.ACTION_NUM//2)+i)[3:]) 
-            genes += [(score(),g)]
+            genes += [(self._score(),g)]
 
         genes = sorted(genes, key=lambda x: x[0], reverse=True)
         for gi in genes:
@@ -80,6 +80,14 @@ class GAManagerTest(unittest.TestCase):
 #            print(gene[i+1][sep:])
 #
         pass
+
+    def test_make_first_generation(self):
+        genes = []
+        for i in range(gagm.CAR_NUM):
+            g = list(int(b) for b in bin(2**(sl.ACTION_NUM//2)+i)[3:]) 
+            genes += [(self._score(),g)]
+
+        self.gm.make_next_generation(genes)
 
 
 if __name__ == "__main__":

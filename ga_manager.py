@@ -74,7 +74,9 @@ class GA_manager:
         return new_ga
 
     def mutation(self, ga_list, probability=0.3):
+        ga_length = len(ga_list[0])
         new_ga = []
+
         for n,ga in enumerate(ga_list):
             if random.random() < probability:
                 idx = random.randint(0,ga_length-1)
@@ -92,7 +94,7 @@ class GA_manager:
         self.genes.append(work[0][1])
         self.genes.append(work[1][1])
 
-        choices = self.choice_by_roulette(work,sl.CAR_NUM-2)
+        choices = self.choice_by_roulette(work,CAR_NUM-2)
         print("choices len:" + str(len(choices)))
 
         print([c[0] for c in choices])
