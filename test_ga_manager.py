@@ -57,6 +57,29 @@ class GAManagerTest(unittest.TestCase):
         print(f"count={count}")
         pass
 
+    def test_mix_exception(self):
+        with self.assertRaises(Exception):
+            self.gm.mix([0,0,0])
+
+    def test_mix_1(self):
+#        #gene = list(list(random.choice([1,0]) for i in range(8)) for _ in range(4))
+#        pair_num = 2
+#        gene = ( [[1,0]*2] + [[0,1]*2] ) * pair_num
+#
+#        for i in range(0,2*pair_num,2):
+#            print(f"before {gene[i]}, {gene[i+1]}")
+#        
+#        mixed_gene = self.gm.mix(gene)
+#
+#        for i in range(0,2*pair_num,2):
+#            print(f"after  {mixed_gene[i]}, {mixed_gene[i+1]}")
+#
+#            sep = list((abs(mixed_gene[i][j]-mixed_gene[i+1][j]) for j in range(len(gene[0])))).index(1,1)
+#            print(sep)
+#            print(gene[i][:sep])
+#            print(gene[i+1][sep:])
+#
+        pass
 
 
 if __name__ == "__main__":

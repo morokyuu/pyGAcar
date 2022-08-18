@@ -62,11 +62,13 @@ class GA_manager:
     def mix(self, ga_list):
         if len(ga_list) % 2 == 1:
             raise Exception("len(ga_list) is not even.")
-        
+
+        ga_length = len(ga_list[0])
         new_ga = []
+
         for i in range(0,len(ga_list),2):
-            nx = random.randint(1,GEN_NUM-1)
-            # print(nx)
+            nx = random.randint(1,ga_length-1)
+            #print(nx)
             new_ga.append(ga_list[i][:nx] + ga_list[i+1][nx:])
             new_ga.append(ga_list[i+1][:nx] + ga_list[i][nx:])
         return new_ga
@@ -75,7 +77,7 @@ class GA_manager:
         new_ga = []
         for n,ga in enumerate(ga_list):
             if random.random() < probability:
-                idx = random.randint(0,GEN_NUM-1)
+                idx = random.randint(0,ga_length-1)
                 if ga[idx] == 1:
                     ga[idx] = 0
                 else:
@@ -90,7 +92,7 @@ class GA_manager:
         self.genes.append(work[0][1])
         self.genes.append(work[1][1])
 
-        choices = self.choice_by_roulette(work,CAR_NUM-2)
+        choices = self.choice_by_roulette(work,sl.CAR_NUM-2)
         print("choices len:" + str(len(choices)))
 
         print([c[0] for c in choices])
