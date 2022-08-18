@@ -19,20 +19,27 @@ class GAcar_main:
 
     def exec(self):
         coursePix = np.array(Image.open('data/debug_course.jpg').convert('L')) 
-        #print(f"GEN_NUM={GEN_NUM}")
 
         genes = []
         for i in range(gm.CAR_NUM):
             gene = self.gm.get_gene(i)
+            print(f"gene {i} = {gene[:20]}")
             sim = sl.SimLoop(cm.Pose(400,300,np.pi),coursePix,gene)
             score = sim.exec()
 
             genes += [(score,gene)]
-        print(genes)
+        #print(genes)
+
+        ms = max(genes,key=lambda x: x[0])
+        print(f"max score={ms[0]:.7g}")
+
+        self.gm.make_next_generation(genes)
 
 def main():
     gac = GAcar_main()
-    gac.exec()
+
+    for _ in range(3):
+        gac.exec()
     pass
 
 if __name__ == "__main__":

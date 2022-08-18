@@ -79,7 +79,7 @@ class SimLoop:
 
             # car movement
             self.car.calc_steer(self.pose,vl,vr)
-            print(f"{self.pose.x:.5g},{self.pose.y:.5g},{self.pose.q:.5g}")
+            #print(f"{self.pose.x:.5g},{self.pose.y:.5g},{self.pose.q:.5g}")
         return score
 
 
