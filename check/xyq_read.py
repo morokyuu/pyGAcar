@@ -18,8 +18,8 @@ df = pd.read_csv("../temp_xyq",header=None)
 #print(df)
 
 l = 80 
-df[3] = l*np.sin(-df[2])
-df[4] = l*np.cos(-df[2])
+df[3] = l*np.sin(df[2])
+df[4] = l*np.cos(df[2])
 print(df)
 
 fig, ax = plt.subplots()
