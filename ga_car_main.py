@@ -26,14 +26,14 @@ class GAcar_main:
 
     def exec(self,dump_enb):
         self.generation += 1
-        coursePix = np.array(Image.open('data/debug_course.jpg').convert('L')) 
+        coursePix = np.array(Image.open('data/course2.jpg').convert('L')) 
 
         genes = []
         for i in range(gm.CAR_NUM):
             gene = self.gm.get_gene(i)
             #print(f"gene {i} = {gene[:20]}")
 
-            sim = sl.SimLoop(cm.Pose(400,300,np.pi),coursePix,gene)
+            sim = sl.SimLoop(cm.Pose(544,288,np.pi),coursePix,gene)
             if i == 0:
                 score, self.dump = sim.exec()
             else:
@@ -58,6 +58,8 @@ class GAcar_main:
             fp.write(self.dump)
 
         genes = sorted(genes,key=lambda x: x[0],reverse=True)
+        print(f"max score={genes[0][0]:.7g}",flush=True)
+
         gene_name = "temp_dump/gene_"+stamp+".txt"
         with open(gene_name,"w") as fp:
             fp.write(f"generation={self.generation}"+"\n")
@@ -67,8 +69,9 @@ class GAcar_main:
 def main():
     gac = GAcar_main()
     dump_enb = False
+    LOOP_NUM = 1000
 
-    for n in range(1000):
+    for n in range(LOOP_NUM+1):
         if n % 50 == 0:
             dump_enb = True
         else:
