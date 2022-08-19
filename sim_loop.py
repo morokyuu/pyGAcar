@@ -10,7 +10,7 @@ from PIL import Image, ImageDraw
 import car_model as cm
 import random
 
-LOOP_NUM = 100
+LOOP_NUM = 500
 STATE_T_NUM=3 # num of previous data
 STATE_PATTERN = 4
 STATE_NUM=STATE_PATTERN**STATE_T_NUM

@@ -14,7 +14,8 @@ import matplotlib.pyplot as plt
 WINDOW_W = 640
 WINDOW_H = 480
 
-df = pd.read_csv("../temp_xyq",header=None)
+# df = pd.read_csv("../temp_xyq",header=None)
+df = pd.read_csv("../temp_xyqs",header=None)
 #print(df)
 
 l = 80 

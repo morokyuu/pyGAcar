@@ -12,37 +12,68 @@ import random
 import ga_manager as gm
 import sim_loop as sl
 
+import datetime
+def get_timestamp():
+    now = datetime.datetime.now()
+    return f"{str(now.year)[2:]}{now.month:02}{now.day:02}{now.hour:02}{now.minute:02}{now.second:02}"
+
 class GAcar_main:
     def __init__(self):
+        self.generation = 0
         self.gm = gm.GA_manager()
         self.gm.make_first_generation()
         self.dump = ""
 
-    def exec(self):
+    def exec(self,dump_enb):
+        self.generation += 1
         coursePix = np.array(Image.open('data/debug_course.jpg').convert('L')) 
 
         genes = []
         for i in range(gm.CAR_NUM):
             gene = self.gm.get_gene(i)
             #print(f"gene {i} = {gene[:20]}")
+
             sim = sl.SimLoop(cm.Pose(400,300,np.pi),coursePix,gene)
-            score, self.dump = sim.exec()
+            if i == 0:
+                score, self.dump = sim.exec()
+            else:
+                score, _ = sim.exec()
 
             genes += [(score,gene)]
-        #print(genes)
 
-        ms = max(genes,key=lambda x: x[0])
-        print(f"max score={ms[0]:.7g}")
+        #ms = max(genes,key=lambda x: x[0])
+        #print(f"max score={ms[0]:.7g}",flush=True)
+
+        if dump_enb:
+            self.do_dump(genes)
 
         self.gm.make_next_generation(genes)
-        return self.dump
+
+
+    def do_dump(self,genes):
+        stamp = get_timestamp()
+
+        trail_name = "temp_dump/xyqs_"+stamp+".txt"
+        with open(trail_name,"w") as fp:
+            fp.write(self.dump)
+
+        genes = sorted(genes,key=lambda x: x[0],reverse=True)
+        gene_name = "temp_dump/gene_"+stamp+".txt"
+        with open(gene_name,"w") as fp:
+            fp.write(f"generation={self.generation}"+"\n")
+            fp.write(f"max score="+str(genes[0][0])+"\n") #score
+            fp.write(str(genes[0][1])+"\n") #gene
 
 def main():
     gac = GAcar_main()
+    dump_enb = False
 
-    for _ in range(3):
-        dump = gac.exec()
-    print(dump)
+    for n in range(1000):
+        if n % 50 == 0:
+            dump_enb = True
+        else:
+            dump_enb = False
+        gac.exec(dump_enb)
 
 if __name__ == "__main__":
     main()
