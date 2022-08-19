@@ -61,7 +61,7 @@ class Car:
     def __init__(self):
         #robot size
         self.BODY_W = 40
-        self.BODY_L = 70
+        self.BODY_L = 60
         self.THICK = 5
         self.DIAMETER = 30
 
@@ -79,15 +79,17 @@ class Car:
             [0, self.DIAMETER,1],
             ]).T
 
-        self.sens = np.array([
-            [-self.BODY_W/2.0 + 8, 65, 1]
-            ]).T
 
-        self.body = np.dot(trans(-self.BODY_W/2.0, -self.DIAMETER/2.0),self.body)
+        cent = 0+1.0j
+        rpoint = 1/2.0 + np.sqrt(3)/2.0j
+        ray_length = 140.0
+        self.ray = np.array(list(list([ray_length * np.real(p),ray_length * np.imag(p),1]) for p in (cent * (rpoint)**i for i in range(6)))).T
+        #print(self.ray)
+
+        self.body = np.dot(trans(-self.BODY_W/2.0, -self.BODY_L/2.0),self.body)
         self.tireR = np.dot(trans(self.BODY_W/2.0, -self.DIAMETER/2.0),self.tire)
         self.tireL = np.dot(mirrorX(),self.tireR)
-        self.sensR = np.dot(trans(0, -15),self.sens)
-        self.sensL = np.dot(mirrorX(),self.sensR)
+        self.ray = np.dot(trans(0, 20),self.ray)
 
     def calc_steer(self,pose,vel_L,vel_R):
         t_sq = (vel_L - vel_R) / self.BODY_W
@@ -119,34 +121,19 @@ class Car:
         def clamp(val,maxval):
             return int(max(min(maxval,val),0))
 
-        sr = pose.get_tf() @ self.sensR
-        sl = pose.get_tf() @ self.sensL
-
-        srx,sry,_ = list(int(v) for v in sr)
-        slx,sly,_ = list(int(v) for v in sl)
-
-        cr = pix[clamp(sry,WINDOW_H-1),clamp(srx,WINDOW_W-1)]
-        cl = pix[clamp(sly,WINDOW_H-1),clamp(slx,WINDOW_W-1)]
-        #print(f"sensL: pix[{slx},{sly}]={cl} sensR: pix[{srx},{sry}]={cr}")
-
-        cr = self.threshold(cr)
-        cl = self.threshold(cl)
+        cl = cr = 0
         return cl,cr
 
 
 def main():
-
-    coursePix = np.array(Image.open('data/debug_course.jpg').convert('L')) 
-    
     car = Car()
 
     pose = Pose(400,300,np.pi)
 
-    for i in range(67):  #(3.14/2)/0.025 = 68
-    #for i in range(1):  #(3.14/2)/0.025 = 68
+    for i in range(1):  #(3.14/2)/0.025 = 68
         car.calc_steer(pose, 1,2)
         #print(f"q={pose.q:.4g}, x={pose.x:.4g}, y={pose.y:.4g}")
-        cl,cr = car.get_sens(pose,coursePix)
+        #cl,cr = car.get_sens(pose,coursePix)
 
         #if False:
         if True:
@@ -157,13 +144,11 @@ def main():
             c_body  = dv @ car.body
             c_tireR = dv @ car.tireR
             c_tireL = dv @ car.tireL
-            c_sensR = dv @ car.sensR
-            c_sensL = dv @ car.sensL
+            c_ray = dv @ car.ray
             drawCircle(ax, c_body , _fc='g')
             drawCircle(ax, c_tireR, _fc='g')
             drawCircle(ax, c_tireL, _fc='g')
-            drawCircle(ax, c_sensR, _fc='r', _r=2)
-            drawCircle(ax, c_sensL, _fc='r', _r=2)
+            drawCircle(ax, c_ray, _fc='r', _r=2)
 
             ax.set_xlabel("X [mm]")
             ax.set_ylabel("Y [mm]")
