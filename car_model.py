@@ -120,7 +120,7 @@ class Car:
         flag = s_on and t_on
 
         #return flag, tuple(st[1] * c)
-        cp = np.array([st[1] * c])
+        cp = np.array([np.array(st[1] * c) + line0_xy[:,0]]).T
 
         return flag, cp
 
@@ -200,11 +200,11 @@ def main():
             ray0 = c_ray[:,2:4]
             print(ray0)
 
-            hit,crosspoint = car._calc_cross_point(l1,ray0)
+            hit,crosspoint = car._calc_cross_point(ray0,l1)
             print(hit)
+            print(crosspoint)
 
-#            print(crosspoint)
-#            drawCircle(ax, crosspoint)
+            drawCircle(ax, crosspoint, _r=3)
 
 
             ax.set_xlabel("X [mm]")
