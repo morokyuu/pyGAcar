@@ -198,11 +198,10 @@ def main():
 
             #ray0 = c_ray[:,10:13]
             ray0 = c_ray[:,2:4]
-            print(ray0)
+
+            drawLine(ax, ray0, color="yellow")
 
             hit,crosspoint = car._calc_cross_point(ray0,l1)
-            print(hit)
-            print(crosspoint)
 
             drawCircle(ax, crosspoint, _r=3)
 
