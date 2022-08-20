@@ -79,7 +79,6 @@ class Car:
             [0, self.DIAMETER,1],
             ]).T
 
-
         cent = 0+1.0j
         rpoint = 1/2.0 + np.sqrt(3)/2.0j
         ray_length = 140.0
@@ -90,6 +89,31 @@ class Car:
         self.tireR = np.dot(trans(self.BODY_W/2.0, -self.DIAMETER/2.0),self.tire)
         self.tireL = np.dot(mirrorX(),self.tireR)
         self.ray = np.dot(trans(0, 20),self.ray)
+
+    def _calc_cross_point(self,line0_xy,line1_xy):
+        #a = np.array(line1_xy[0])-np.array(line0_xy[0])
+        a = line1_xy[:,0]-line0_xy[:,0]
+        b = line1_xy[:,1]-line0_xy[:,0]
+        c = line0_xy[:,1]-line0_xy[:,0]
+        #print(a,b,c)
+        A = np.array([
+            [a[0] - b[0], -c[0]],
+            [a[1] - b[1], -c[1]]
+            ])
+        Bv = np.array([
+            [-b[0]],
+            [-b[1]]
+            ])    
+        A_inv = np.linalg.inv(A)
+        #print(A_inv)
+        
+        st = np.dot(A_inv, Bv)
+        s_on = 0 < st[0] and st[0] < 1
+        t_on = 0 < st[1] and st[1] < 1
+        print(f"st:\n{st}\n s_on {s_on}, t_on {t_on}")
+        flag = s_on and t_on
+        return flag, tuple(st[1] * c)
+
 
     def calc_steer(self,pose,vel_L,vel_R):
         t_sq = (vel_L - vel_R) / self.BODY_W
@@ -149,6 +173,28 @@ def main():
             drawCircle(ax, c_tireR, _fc='g')
             drawCircle(ax, c_tireL, _fc='g')
             drawCircle(ax, c_ray, _fc='r', _r=2)
+            
+            l0 = np.array([
+                [100,100,1],
+                [300,300,1]
+                ]).T
+            l1 = np.array([
+                [300,300,1],
+                [400,200,1]
+                ]).T
+
+            drawLine(ax,l0)
+            drawLine(ax,l1)
+#            ray5 = [(c_ray[0][0], c_ray[0][1]),(pose.x,pose.y)]
+#
+#            print("ray5")
+#            print(ray5)
+
+            #hit,_ = car._calc_cross_point(ray5,l1)
+#            a = ((0,0),(200,250))
+#            b = ((200,200),(0,400))
+            hit,_ = car._calc_cross_point(l0,l1)
+            print(hit)
 
             ax.set_xlabel("X [mm]")
             ax.set_ylabel("Y [mm]")
