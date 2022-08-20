@@ -79,10 +79,16 @@ class Car:
             [0, self.DIAMETER,1],
             ]).T
 
+        #lidar-rays
+        RAY_NUM = 6
         cent = 0+1.0j
-        rpoint = 1/2.0 + np.sqrt(3)/2.0j
-        ray_length = 140.0
-        self.ray = np.array(list(list([ray_length * np.real(p),ray_length * np.imag(p),1]) for p in (cent * (rpoint)**i for i in range(6)))).T
+        rpoint = 1/2.0 + np.sqrt(3)/2.0j #If RAY_NUM changed, rpoint should be changed too.
+        #ray_length = 140.0
+        ray_length = 100.0
+        end_points = np.array(list(list([ray_length * np.real(p),ray_length * np.imag(p),1]) for p in (cent * (rpoint)**i for i in range(RAY_NUM))))
+        #print(end_points)
+        org_points = np.hstack((np.zeros((RAY_NUM,2)),np.ones((RAY_NUM,1))))
+        self.ray = np.reshape(np.hstack((end_points,org_points)),(RAY_NUM*2,3)).T
         #print(self.ray)
 
         self.body = np.dot(trans(-self.BODY_W/2.0, -self.BODY_L/2.0),self.body)
@@ -103,7 +109,7 @@ class Car:
         Bv = np.array([
             [-b[0]],
             [-b[1]]
-            ])    
+            ])
         A_inv = np.linalg.inv(A)
         #print(A_inv)
         
@@ -112,7 +118,11 @@ class Car:
         t_on = 0 < st[1] and st[1] < 1
         print(f"st:\n{st}\n s_on {s_on}, t_on {t_on}")
         flag = s_on and t_on
-        return flag, tuple(st[1] * c)
+
+        #return flag, tuple(st[1] * c)
+        cp = np.array([st[1] * c])
+
+        return flag, cp
 
 
     def calc_steer(self,pose,vel_L,vel_R):
@@ -185,16 +195,17 @@ def main():
 
             drawLine(ax,l0)
             drawLine(ax,l1)
-#            ray5 = [(c_ray[0][0], c_ray[0][1]),(pose.x,pose.y)]
-#
-#            print("ray5")
-#            print(ray5)
 
-            #hit,_ = car._calc_cross_point(ray5,l1)
-#            a = ((0,0),(200,250))
-#            b = ((200,200),(0,400))
-            hit,_ = car._calc_cross_point(l0,l1)
+            #ray0 = c_ray[:,10:13]
+            ray0 = c_ray[:,2:4]
+            print(ray0)
+
+            hit,crosspoint = car._calc_cross_point(l1,ray0)
             print(hit)
+
+#            print(crosspoint)
+#            drawCircle(ax, crosspoint)
+
 
             ax.set_xlabel("X [mm]")
             ax.set_ylabel("Y [mm]")
