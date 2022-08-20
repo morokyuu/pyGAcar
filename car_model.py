@@ -9,8 +9,8 @@ import matplotlib.patches as patches
 
 from PIL import Image, ImageDraw
 
-WINDOW_W = 640
-WINDOW_H = 480
+WINDOW_W = 600
+WINDOW_H = 600
 
 def rot(th):
     return np.array([
@@ -184,26 +184,16 @@ def main():
             drawCircle(ax, c_tireL, _fc='g')
             drawCircle(ax, c_ray, _fc='r', _r=2)
             
-            l0 = np.array([
-                [100,100,1],
-                [300,300,1]
-                ]).T
-            l1 = np.array([
-                [300,300,1],
-                [400,200,1]
-                ]).T
+            #walls
+            walls = np.array([[300,0,1],[600,300,1],[300,600,1],[0,300,1]])
+            walls = np.reshape(np.hstack((walls, np.roll(walls,3*3))),(8,3)).T
+            drawLine(ax,walls)
 
-            drawLine(ax,l0)
-            drawLine(ax,l1)
-
-            #ray0 = c_ray[:,10:13]
-            ray0 = c_ray[:,2:4]
-
-            drawLine(ax, ray0, color="yellow")
-
-            hit,crosspoint = car._calc_cross_point(ray0,l1)
-
-            drawCircle(ax, crosspoint, _r=3)
+#            #ray0 = c_ray[:,10:13]
+#            ray0 = c_ray[:,2:4]
+#            drawLine(ax, ray0, color="yellow")
+#            hit,crosspoint = car._calc_cross_point(ray0,l1)
+#            drawCircle(ax, crosspoint, _r=3)
 
 
             ax.set_xlabel("X [mm]")
