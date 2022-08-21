@@ -179,22 +179,22 @@ class Field():
         _,rc = rays.shape
         _,wc = self.walls.shape
 
-        for i in range(rc//2):
-            for j in range(wc//2):
-
-                ci = 2*i
-                cj = 2*j
-                hit,_ = self._calc_cross_point(rays[:,ci:ci+2],self.walls[:,cj:cj+2])
+        state = 0
+        for ni,i in enumerate(range(0,rc,2)):
+            for nj,j in enumerate(range(0,wc,2)):
+                hit,_ = self._calc_cross_point(rays[:,i:i+2],self.walls[:,j:j+2])
                 if hit:
-                    print(f"ray{i}:wall{j}")
-        return
+                    state += 2**ni
+                    print(f"ray{ni}:wall{nj}")
+        print(f"dec {state} bit {bin(state)}")
+        return state
 
 
 def main():
     car = Car()
     field = Field()
 
-    pose = Pose(200,200,np.pi)
+    pose = Pose(400,450,np.pi+0.3)
 
     for i in range(1):  #(3.14/2)/0.025 = 68
         car.calc_steer(pose, 1,2)
@@ -217,7 +217,7 @@ def main():
             drawCircle(ax, c_ray, _fc='r', _r=2)
 
             #ray0 = c_ray[:,10:13]
-            ray0 = c_ray[:,2:4]
+            ray0 = c_ray[:,0:2]
             drawLine(ax, ray0, color="yellow")
 #            hit,crosspoint = car._calc_cross_point(ray0,l1)
 #            drawCircle(ax, crosspoint, _r=3)
