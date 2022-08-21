@@ -79,6 +79,14 @@ class Car:
             [0, self.DIAMETER,1],
             ]).T
 
+        self._lidar_init()
+
+        self.body = np.dot(trans(-self.BODY_W/2.0, -self.BODY_L/2.0),self.body)
+        self.tireR = np.dot(trans(self.BODY_W/2.0, -self.DIAMETER/2.0),self.tire)
+        self.tireL = np.dot(mirrorX(),self.tireR)
+        self.ray = np.dot(trans(0, 20),self.ray)
+
+    def _lidar_init(self):
         #lidar-rays
         RAY_NUM = 6
         cent = 0+1.0j
@@ -91,38 +99,7 @@ class Car:
         self.ray = np.reshape(np.hstack((end_points,org_points)),(RAY_NUM*2,3)).T
         #print(self.ray)
 
-        self.body = np.dot(trans(-self.BODY_W/2.0, -self.BODY_L/2.0),self.body)
-        self.tireR = np.dot(trans(self.BODY_W/2.0, -self.DIAMETER/2.0),self.tire)
-        self.tireL = np.dot(mirrorX(),self.tireR)
-        self.ray = np.dot(trans(0, 20),self.ray)
 
-    def _calc_cross_point(self,line0_xy,line1_xy):
-        #a = np.array(line1_xy[0])-np.array(line0_xy[0])
-        a = line1_xy[:,0]-line0_xy[:,0]
-        b = line1_xy[:,1]-line0_xy[:,0]
-        c = line0_xy[:,1]-line0_xy[:,0]
-        #print(a,b,c)
-        A = np.array([
-            [a[0] - b[0], -c[0]],
-            [a[1] - b[1], -c[1]]
-            ])
-        Bv = np.array([
-            [-b[0]],
-            [-b[1]]
-            ])
-        A_inv = np.linalg.inv(A)
-        #print(A_inv)
-        
-        st = np.dot(A_inv, Bv)
-        s_on = 0 < st[0] and st[0] < 1
-        t_on = 0 < st[1] and st[1] < 1
-        print(f"st:\n{st}\n s_on {s_on}, t_on {t_on}")
-        flag = s_on and t_on
-
-        #return flag, tuple(st[1] * c)
-        cp = np.array([np.array(st[1] * c) + line0_xy[:,0]]).T
-
-        return flag, cp
 
 
     def calc_steer(self,pose,vel_L,vel_R):
@@ -151,6 +128,7 @@ class Car:
         else:
             return 1
 
+    #linetracer-ver
     def get_sens(self,pose,pix):
         def clamp(val,maxval):
             return int(max(min(maxval,val),0))
@@ -158,11 +136,61 @@ class Car:
         cl = cr = 0
         return cl,cr
 
+    def get_lidar_rays(self,pose):
+        tf = pose.get_tf()
+        return tf @ self.ray
+
+
+
+class Field():
+    def __init__(self):
+        #walls
+        vert = np.array([[300,0,1],[600,300,1],[300,600,1],[0,300,1]])
+        self.walls = np.reshape(np.hstack((vert, np.roll(vert,3*3))),(8,3)).T
+
+    def _calc_cross_point(self,line0_xy,line1_xy):
+        #a = np.array(line1_xy[0])-np.array(line0_xy[0])
+        a = line1_xy[:,0]-line0_xy[:,0]
+        b = line1_xy[:,1]-line0_xy[:,0]
+        c = line0_xy[:,1]-line0_xy[:,0]
+        #print(a,b,c)
+        A = np.array([
+            [a[0] - b[0], -c[0]],
+            [a[1] - b[1], -c[1]]
+            ])
+        Bv = np.array([
+            [-b[0]],
+            [-b[1]]
+            ])
+        A_inv = np.linalg.inv(A)
+        #print(A_inv)
+        
+        st = np.dot(A_inv, Bv)
+        s_on = 0 < st[0] and st[0] < 1
+        t_on = 0 < st[1] and st[1] < 1
+        #print(f"st:\n{st}\n s_on {s_on}, t_on {t_on}")
+        flag = s_on and t_on
+
+        #return flag, tuple(st[1] * c)
+        cp = np.array([np.array(st[1] * c) + line0_xy[:,0]]).T
+        return flag[0], cp
+
+    def get_response(self,rays):
+        _,rc = rays.shape
+        _,wc = self.walls.shape
+
+        for i in range(0,rc,2):
+            for j in range(0,wc,2):
+                hit,_ = self._calc_cross_point(rays[:,i:i+2],self.walls[:,j:j+2])
+                print(hit)
+        return
+
 
 def main():
     car = Car()
+    field = Field()
 
-    pose = Pose(400,300,np.pi)
+    pose = Pose(400,200,np.pi)
 
     for i in range(1):  #(3.14/2)/0.025 = 68
         car.calc_steer(pose, 1,2)
@@ -183,17 +211,18 @@ def main():
             drawCircle(ax, c_tireR, _fc='g')
             drawCircle(ax, c_tireL, _fc='g')
             drawCircle(ax, c_ray, _fc='r', _r=2)
-            
-            #walls
-            walls = np.array([[300,0,1],[600,300,1],[300,600,1],[0,300,1]])
-            walls = np.reshape(np.hstack((walls, np.roll(walls,3*3))),(8,3)).T
-            drawLine(ax,walls)
 
-#            #ray0 = c_ray[:,10:13]
-#            ray0 = c_ray[:,2:4]
-#            drawLine(ax, ray0, color="yellow")
+            #ray0 = c_ray[:,10:13]
+            ray0 = c_ray[:,2:4]
+            drawLine(ax, ray0, color="yellow")
 #            hit,crosspoint = car._calc_cross_point(ray0,l1)
 #            drawCircle(ax, crosspoint, _r=3)
+            
+            drawLine(ax,field.walls)
+
+            field.get_response(car.get_lidar_rays(pose))
+
+            
 
 
             ax.set_xlabel("X [mm]")
