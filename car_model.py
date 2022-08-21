@@ -219,12 +219,10 @@ def main():
             #ray0 = c_ray[:,10:13]
             ray0 = c_ray[:,0:2]
             drawLine(ax, ray0, color="yellow")
-#            hit,crosspoint = car._calc_cross_point(ray0,l1)
-#            drawCircle(ax, crosspoint, _r=3)
             
             drawLine(ax,field.walls)
 
-            field.get_response(car.get_lidar_rays(pose))
+            state = field.get_response(car.get_lidar_rays(pose))
 
             
 
