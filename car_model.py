@@ -177,7 +177,7 @@ def main():
 
             #if True:
             if False:
-                name = f"car{i}.png"
+                name = "car{0}.png".format(i)
                 plt.savefig(name)
                 plt.clf()
 

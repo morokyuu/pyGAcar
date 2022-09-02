@@ -22,38 +22,38 @@ class CarTest(unittest.TestCase):
     def test_sens_1(self):
         self.pose = cm.Pose(450,300,np.pi)
         sens = self.car.get_sens(self.pose,self.coursePix)
-        print(f"sens(L,R) = {sens}")
+        print("sens(L,R) = {0}".format(sens))
         self.assertEqual((0,0),sens)
 
     def test_sens_2(self):
         self.pose = cm.Pose(400,300,np.pi)
         sens = self.car.get_sens(self.pose,self.coursePix)
-        print(f"sens(L,R) = {sens}")
+        print("sens(L,R) = {0}".format(sens))
         self.assertEqual((1,0),sens)
 
     def test_sens_3(self):
         self.pose = cm.Pose(380,300,np.pi)
         sens = self.car.get_sens(self.pose,self.coursePix)
-        print(f"sens(L,R) = {sens}")
+        print("sens(L,R) = {0}".format(sens))
         self.assertEqual((1,1),sens)
 
     def test_sens_4(self):
         self.pose = cm.Pose(350,300,np.pi)
         sens = self.car.get_sens(self.pose,self.coursePix)
-        print(f"sens(L,R) = {sens}")
+        print("sens(L,R) = {0}".format(sens))
         self.assertEqual((0,1),sens)
 
     def test_sens_5(self):
         self.pose = cm.Pose(335,240,np.pi/2.0)
         sens = self.car.get_sens(self.pose,self.coursePix)
-        print(f"sens(L,R) = {sens}")
+        print("sens(L,R) = {0}".format(sens))
         self.assertEqual((0,0),sens)
         #self.plot_car()
 
     def test_sens_overarea(self):
         self.pose = cm.Pose(620,300,-np.pi/2.0)
         sens = self.car.get_sens(self.pose,self.coursePix)
-        print(f"sens(L,R) = {sens}")
+        print("sens(L,R) = {0}".format(sens))
         self.assertEqual((0,0),sens)
         #self.plot_car()
 

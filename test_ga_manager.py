@@ -43,12 +43,12 @@ class GAManagerTest(unittest.TestCase):
 
         genes = sorted(genes, key=lambda x: x[0], reverse=True)
         for gi in genes:
-            print(f"{gi[0]:5.2f},{gi[1]}")
+            print("{0:5.2f},{1}".format(gi[0],gi[1]))
 
         ga_1st = genes[0][1]
         ga_2nd = genes[1][1]
-        print(f"{genes[0][1]}")
-        print(f"{genes[1][1]}")
+        print(genes[0][1])
+        print(genes[1][1])
 
         count = 0
         for _ in range(100):
@@ -59,7 +59,7 @@ class GAManagerTest(unittest.TestCase):
             if ga_2nd == choices[1][1]:
                 count += 1
 
-        print(f"count={count}")
+        print("count={0}".format(count))
         pass
 
     def test_mix_exception(self):

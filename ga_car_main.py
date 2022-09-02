@@ -15,7 +15,7 @@ import sim_loop as sl
 import datetime
 def get_timestamp():
     now = datetime.datetime.now()
-    return f"{str(now.year)[2:]}{now.month:02}{now.day:02}{now.hour:02}{now.minute:02}{now.second:02}"
+    return "{0:%y%m%d%H%M%S}".format(now)
 
 class GAcar_main:
     def __init__(self):
@@ -31,7 +31,7 @@ class GAcar_main:
         genes = []
         for i in range(gm.CAR_NUM):
             gene = self.gm.get_gene(i)
-            #print(f"gene {i} = {gene[:20]}")
+            #print("gene {0} = {1}".format(i,gene[:20]))
 
             sim = sl.SimLoop(cm.Pose(544,288,np.pi),coursePix,gene)
             if i == 0:
@@ -42,7 +42,7 @@ class GAcar_main:
             genes += [(score,gene)]
 
         #ms = max(genes,key=lambda x: x[0])
-        #print(f"max score={ms[0]:.7g}",flush=True)
+        #print("max score={0:.7g}".format(ms[0]),flush=True)
 
         if dump_enb:
             self.do_dump(genes)
@@ -58,7 +58,7 @@ class GAcar_main:
             fp.write(self.dump)
 
         genes = sorted(genes,key=lambda x: x[0],reverse=True)
-        print(f"max score={genes[0][0]:.7g}",flush=True)
+        print("max score={0:.7g}".format(genes[0][0]),flush=True)
 
         gene_name = "temp_dump/gene_"+stamp+".txt"
         with open(gene_name,"w") as fp:

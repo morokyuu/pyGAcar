@@ -20,11 +20,11 @@ class GA_manager:
 
     def debug_gene_content(self):
         for n,gene in enumerate(self.genes):
-            print(f"{n},",end="")
+            print("{0},".format(n),end="")
             for i,g in enumerate(gene):
                 if i % 8 == 0:
                     print("|",end="")
-                print(f"{g}",end="")
+                print("{0}".format,end="")
             print("")
 
     def make_first_generation(self):

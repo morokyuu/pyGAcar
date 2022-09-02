@@ -73,7 +73,6 @@ class SimLoop:
 
             # car control based on sensor state
             vl,vr = self._calc_wheel_speed(self.state,self.gene)
-            #print(f"vl,vr={vl:.4g},{vr:.4g}")
 
             # calc GA score
             score += self._calc_score(self.state,vl,vr)
@@ -82,7 +81,7 @@ class SimLoop:
             # car movement
             self.car.calc_steer(self.pose,vl,vr)
             #print(f"{self.pose.x:.5g},{self.pose.y:.5g},{self.pose.q:.5g}")
-            dump += f"{self.pose.x:10.3f},{self.pose.y:10.3f},{self.pose.q:10.5f},{self.state[-1]:3d}\n"
+            dump += "{0:10.3f},{1:10.3f},{2:10.5f},{3:3d}\n".format(self.pose.x,self.pose.y,self.pose.q,self.state[-1])
         return score,dump
 
 

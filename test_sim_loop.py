@@ -38,7 +38,7 @@ class SimLoopTest(unittest.TestCase):
     def test_state_to_gene_index(self):
         state = [3,3,3]
         idx = self.sim._state_to_gene_index(state)
-        print(f"state={state},idx={idx}")
+        print("state={0},idx={1}".format(state,idx))
         self.assertEqual(idx,630)
 
     def test_calc_wheel_speed(self):
@@ -49,7 +49,7 @@ class SimLoopTest(unittest.TestCase):
         self.gene = self.gene[:idx] + targ_gene + self.gene[idx+sl.ACTION_NUM:]  
 
         vl,vr = self.sim._calc_wheel_speed(state,self.gene)
-        print(f"vl,vr={vl},{vr}")
+        print("vl,vr={0},{1}".format(vl,vr))
         self.assertEqual(vl,self.sim.speed_tbl[2**(sl.ACTION_NUM//2)-1])
         self.assertEqual(vr,self.sim.speed_tbl[0])
 
