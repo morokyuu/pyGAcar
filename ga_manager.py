@@ -10,13 +10,13 @@ import os
 from PIL import Image
 from enum import Enum
 
-import sim_loop as sl
 
 CAR_NUM = 10
 
 class GA_manager:
-    def __init__(self):
+    def __init__(self,GEN_NUM):
         self.genes = []
+        self.GEN_NUM = GEN_NUM
 
     def debug_gene_content(self):
         for n,gene in enumerate(self.genes):
@@ -29,7 +29,7 @@ class GA_manager:
 
     def make_first_generation(self):
         for _ in range(CAR_NUM):
-            self.genes.append([random.choice([1,0]) for _ in range(sl.GEN_NUM)])
+            self.genes.append([random.choice([1,0]) for _ in range(self.GEN_NUM)])
         
 
     

@@ -10,12 +10,17 @@ import matplotlib.patches as patches
 from PIL import Image
 import ga_manager as gagm
 import random
-import sim_loop as sl
+
+STATE_T_NUM=3 # num of previous data
+STATE_PATTERN = 4
+STATE_NUM=STATE_PATTERN**STATE_T_NUM
+ACTION_NUM=5*2 #speed:5bit * 2motor
+GEN_NUM=ACTION_NUM * STATE_NUM # length of single gene
 
 class GAManagerTest(unittest.TestCase):
     def setUp(self):
         print("setUp===")
-        self.gm = gagm.GA_manager()
+        self.gm = gagm.GA_manager(GEN_NUM)
 
     def tearDown(self):
         pass
@@ -25,7 +30,7 @@ class GAManagerTest(unittest.TestCase):
         #print(self.gm.genes)
 
         self.assertEqual(len(self.gm.genes),gagm.CAR_NUM)
-        self.assertEqual(len(self.gm.genes[0]),sl.GEN_NUM)
+        self.assertEqual(len(self.gm.genes[0]),GEN_NUM)
 
     def _score(self):
         return random.random()*100
@@ -33,7 +38,7 @@ class GAManagerTest(unittest.TestCase):
     def test_choice_by_roulette(self):
         genes = []
         for i in range(gagm.CAR_NUM):
-            g = list(int(b) for b in bin(2**(sl.ACTION_NUM//2)+i)[3:]) 
+            g = list(int(b) for b in bin(2**(ACTION_NUM//2)+i)[3:]) 
             genes += [(self._score(),g)]
 
         genes = sorted(genes, key=lambda x: x[0], reverse=True)
@@ -84,7 +89,7 @@ class GAManagerTest(unittest.TestCase):
     def test_make_first_generation(self):
         genes = []
         for i in range(gagm.CAR_NUM):
-            g = list(int(b) for b in bin(2**(sl.ACTION_NUM//2)+i)[3:]) 
+            g = list(int(b) for b in bin(2**(ACTION_NUM//2)+i)[3:]) 
             genes += [(self._score(),g)]
 
         self.gm.make_next_generation(genes)
