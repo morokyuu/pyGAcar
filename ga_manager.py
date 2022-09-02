@@ -20,11 +20,11 @@ class GA_manager:
 
     def debug_gene_content(self):
         for n,gene in enumerate(self.genes):
-            print("{0},".format(n),end="")
+            print("{0},".format(n)),
             for i,g in enumerate(gene):
                 if i % 8 == 0:
-                    print("|",end="")
-                print("{0}".format,end="")
+                    print("|"),
+                print("{0}".format),
             print("")
 
     def make_first_generation(self):
@@ -90,7 +90,7 @@ class GA_manager:
     def make_next_generation(self, score_ga):
         work = sorted(score_ga,key=lambda x: x[0],reverse=True)
 
-        self.genes.clear()
+        del self.genes[:]
         self.genes.append(work[0][1])
         self.genes.append(work[1][1])
 
